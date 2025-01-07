@@ -25,10 +25,10 @@ import Link from "next/link"
 
 type ProjectStatus = "pending" | "in_progress" | "completed" | "on_hold" | "cancelled"
 
-const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" }> = {
   pending: { label: "Ausstehend", variant: "secondary" },
   in_progress: { label: "In Bearbeitung", variant: "default" },
-  completed: { label: "Abgeschlossen", variant: "default" },
+  completed: { label: "Abgeschlossen", variant: "success" },
   on_hold: { label: "Pausiert", variant: "outline" },
   cancelled: { label: "Storniert", variant: "destructive" },
 }
