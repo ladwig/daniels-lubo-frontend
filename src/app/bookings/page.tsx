@@ -29,9 +29,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
-import { Calendar, List, Plus, Search } from "lucide-react"
+import { Calendar, List, Plus, Search, MapPin } from "lucide-react"
 import Link from "next/link"
 import { CraftsmanPill } from "@/components/ui/craftsman-pill"
+import dynamic from "next/dynamic"
+import MapView from "@/components/bookings/map-view"
 
 // Mock data for bookings
 const bookings = [
@@ -104,7 +106,91 @@ const craftsmen = [
   { id: "C5", name: "Alex Johnson" },
 ]
 
-type ViewType = "table" | "calendar"
+// Mock data for craftsmen locations
+const craftsmenLocations = [
+  {
+    id: "C1",
+    name: "Mike Brown",
+    role: "Gutachter",
+    color: "#FF4136", // Red
+    location: { lat: 52.52, lng: 13.405 }, // Berlin
+    route: [
+      { lat: 52.52, lng: 13.405 }, // Berlin
+      { lat: 52.40, lng: 13.20 }, // Potsdam
+      { lat: 52.16, lng: 13.49 }, // Königs Wusterhausen
+      { lat: 52.36, lng: 13.61 }, // Erkner
+      { lat: 52.52, lng: 13.405 }, // Back to Berlin
+    ]
+  },
+  {
+    id: "C2",
+    name: "Steve Wilson",
+    role: "Hauptinstallateur",
+    color: "#0074D9", // Blue
+    location: { lat: 53.551, lng: 9.993 }, // Hamburg
+    route: [
+      { lat: 53.551, lng: 9.993 }, // Hamburg
+      { lat: 53.86, lng: 10.687 }, // Lübeck
+      { lat: 53.543, lng: 10.215 }, // Bergedorf
+      { lat: 53.471, lng: 9.898 }, // Harburg
+      { lat: 53.551, lng: 9.993 }, // Back to Hamburg
+    ]
+  },
+  {
+    id: "C3",
+    name: "John Smith",
+    role: "Assistent",
+    color: "#2ECC40", // Green
+    location: { lat: 48.137, lng: 11.576 }, // Munich
+    route: [
+      { lat: 48.137, lng: 11.576 }, // Munich
+      { lat: 48.265, lng: 11.668 }, // Garching
+      { lat: 48.155, lng: 11.747 }, // Haar
+      { lat: 48.095, lng: 11.524 }, // Solln
+      { lat: 48.137, lng: 11.576 }, // Back to Munich
+    ]
+  },
+  {
+    id: "C4",
+    name: "Tom Davis",
+    role: "Hauptinstallateur",
+    color: "#B10DC9", // Purple
+    location: { lat: 50.937, lng: 6.961 }, // Cologne
+    route: [
+      { lat: 50.937, lng: 6.961 }, // Cologne
+      { lat: 51.227, lng: 6.773 }, // Düsseldorf
+      { lat: 51.481, lng: 7.216 }, // Bochum
+      { lat: 51.339, lng: 7.017 }, // Wuppertal
+      { lat: 50.937, lng: 6.961 }, // Back to Cologne
+    ]
+  },
+  {
+    id: "C5",
+    name: "Alex Johnson",
+    role: "Spezialist",
+    color: "#FF851B", // Orange
+    location: { lat: 51.339, lng: 12.377 }, // Leipzig
+    route: [
+      { lat: 51.339, lng: 12.377 }, // Leipzig
+      { lat: 51.034, lng: 13.736 }, // Dresden
+      { lat: 50.927, lng: 11.586 }, // Erfurt
+      { lat: 51.482, lng: 11.969 }, // Halle
+      { lat: 51.339, lng: 12.377 }, // Back to Leipzig
+    ]
+  }
+]
+
+// Dynamically import the map component to avoid SSR issues
+const MapView = dynamic(() => import("@/components/bookings/map-view"), {
+  ssr: false,
+  loading: () => (
+    <Card className="h-[800px] flex items-center justify-center">
+      <p className="text-muted-foreground">Lade Karte...</p>
+    </Card>
+  ),
+})
+
+type ViewType = "table" | "calendar" | "map"
 
 export default function BookingsPage() {
   // View state
@@ -202,6 +288,14 @@ export default function BookingsPage() {
           >
             <Calendar className="h-4 w-4 mr-1" />
             Kalenderansicht
+          </Button>
+          <Button
+            variant={view === "map" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setView("map")}
+          >
+            <MapPin className="h-4 w-4 mr-1" />
+            Kartenansicht
           </Button>
         </div>
       </div>
@@ -470,7 +564,7 @@ export default function BookingsPage() {
             </TableBody>
           </Table>
         </Card>
-      ) : (
+      ) : view === "calendar" ? (
         <Card className="p-6">
           <div className="h-[800px] grid grid-cols-[200px_1fr]">
             <div className="border-r pr-4">
@@ -492,6 +586,8 @@ export default function BookingsPage() {
             </div>
           </div>
         </Card>
+      ) : (
+        <MapView craftsmenLocations={craftsmenLocations} />
       )}
     </div>
   )
