@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState } from "react"
-import { Breadcrumb } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -208,13 +208,21 @@ function InventorySlotRow({
 export default function InventoryCheckPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
-      <Breadcrumb
-        segments={[
-          { title: "Inventory", href: "/inventories" },
-          { title: params.licensePlate, href: `/inventories?vehicle=${params.licensePlate}` },
-          { title: `Check ${params.checkId}`, href: `/inventories/${params.licensePlate}/checks/${params.checkId}` },
-        ]}
-      />
+      <Breadcrumb>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/inventories">Inventar</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <BreadcrumbLink href={`/inventories/${params.licensePlate}`}>
+            {inventoryCheckData.licensePlate}
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <BreadcrumbLink>
+            Überprüfung {params.checkId}
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
 
       <div className="flex items-center justify-between">
         <div>

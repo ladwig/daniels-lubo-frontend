@@ -1,4 +1,4 @@
-import { Breadcrumb } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -113,13 +113,19 @@ interface PageProps {
 export default function JobPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
-      <Breadcrumb
-        segments={[
-          { title: "Projects", href: "/projects" },
-          { title: params.id, href: `/projects/${params.id}` },
-          { title: jobData.name, href: `/projects/${params.id}/jobs/${params.jobId}` },
-        ]}
-      />
+      <Breadcrumb>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/projects">Projekte</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <BreadcrumbLink href={`/projects/${params.id}`}>Projekt {params.id}</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <BreadcrumbLink>
+            {jobData.name} - {jobData.id}
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
 
       <div className="flex items-center justify-between">
         <div>

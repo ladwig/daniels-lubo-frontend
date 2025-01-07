@@ -38,7 +38,9 @@ import { Calendar, List, Plus, Search, MapPin, Pencil } from "lucide-react"
 import Link from "next/link"
 import { CraftsmanPill } from "@/components/ui/craftsman-pill"
 import dynamic from "next/dynamic"
-import MapView from "@/components/bookings/map-view"
+const MapView = dynamic(() => import("@/components/bookings/map-view"), {
+  ssr: false,
+})
 
 // Mock data for bookings
 const bookings = [
@@ -184,9 +186,8 @@ const craftsmenLocations = [
     ]
   }
 ]
-
-// Dynamically import the map component to avoid SSR issues
-const MapView = dynamic(() => import("@/components/bookings/map-view"), {
+// Dynamically import the map component to avoid SSR issues 
+const DynamicMapView = dynamic(() => import("@/components/bookings/map-view"), {
   ssr: false,
   loading: () => (
     <Card className="h-[800px] flex items-center justify-center">

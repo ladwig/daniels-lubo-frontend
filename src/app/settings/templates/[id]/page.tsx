@@ -270,62 +270,81 @@ export default function TemplateBuilderPage({ params }: { params: Promise<PagePa
                     ref={provided.innerRef}
                     className="space-y-2"
                   >
-                    {fields.map((field, index) => (
-                      <Draggable
-                        key={field.id}
-                        draggableId={field.id}
-                        index={index}
+                    {fields.length === 0 ? (
+                      <button
+                        onClick={addField}
+                        className="w-full flex items-center justify-center gap-2 p-4 rounded-lg border border-dashed bg-muted/50 hover:bg-muted transition-colors"
                       >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className="flex items-center gap-4 p-4 rounded-lg border bg-card"
+                        <Plus className="h-4 w-4" />
+                        <span className="text-sm text-muted-foreground">Erstes Formularfeld hinzufügen</span>
+                      </button>
+                    ) : (
+                      <>
+                        {fields.map((field, index) => (
+                          <Draggable
+                            key={field.id}
+                            draggableId={field.id}
+                            index={index}
                           >
-                            <div
-                              {...provided.dragHandleProps}
-                              className="text-muted-foreground"
-                            >
-                              <GripVertical className="h-5 w-5" />
-                            </div>
-                            
-                            <div className="flex-1 grid gap-4">
-                              <Input
-                                value={field.question}
-                                onChange={(e) =>
-                                  updateField(field.id, { question: e.target.value })
-                                }
-                                placeholder="Frage eingeben..."
-                              />
-                              <div className="flex items-center gap-2">
-                                {Object.entries(answerTypeConfig).map(([type, config]) => (
-                                  <Button
-                                    key={type}
-                                    size="sm"
-                                    variant={field.answerType === type ? "default" : "outline"}
-                                    onClick={() =>
-                                      updateField(field.id, { answerType: type as AnswerType })
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className="flex items-center gap-4 p-4 rounded-lg border bg-card"
+                              >
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="text-muted-foreground"
+                                >
+                                  <GripVertical className="h-5 w-5" />
+                                </div>
+                                
+                                <div className="flex-1 grid gap-4">
+                                  <Input
+                                    value={field.question}
+                                    onChange={(e) =>
+                                      updateField(field.id, { question: e.target.value })
                                     }
-                                  >
-                                    {config.icon}
-                                    <span className="ml-2">{config.label}</span>
-                                  </Button>
-                                ))}
-                              </div>
-                            </div>
+                                    placeholder="Frage eingeben..."
+                                  />
+                                  <div className="flex items-center gap-2">
+                                    {Object.entries(answerTypeConfig).map(([type, config]) => (
+                                      <Button
+                                        key={type}
+                                        size="sm"
+                                        variant={field.answerType === type ? "default" : "outline"}
+                                        onClick={() =>
+                                          updateField(field.id, { answerType: type as AnswerType })
+                                        }
+                                      >
+                                        {config.icon}
+                                        <span className="ml-2">{config.label}</span>
+                                      </Button>
+                                    ))}
+                                  </div>
+                                </div>
 
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeField(field.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeField(field.id)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        <button
+                          onClick={addField}
+                          className="w-full flex items-center justify-center gap-2 p-4 rounded-lg border border-dashed bg-muted/50 hover:bg-muted transition-colors"
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span className="text-sm text-muted-foreground">Weiteres Feld hinzufügen</span>
+                        </button>
+                        {provided.placeholder}
+                      </>
+                    )}
                   </div>
                 )}
               </Droppable>

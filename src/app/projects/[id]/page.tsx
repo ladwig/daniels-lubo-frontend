@@ -1,4 +1,4 @@
-import { Breadcrumb } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -148,12 +148,16 @@ interface PageProps {
 export default function ProjectPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
-      <Breadcrumb
-        segments={[
-          { title: "Projekte", href: "/projects" },
-          { title: params.id, href: `/projects/${params.id}` },
-        ]}
-      />
+      <Breadcrumb>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/projects">Projekte</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <BreadcrumbLink>
+            {projectData.customer.name} - {projectData.id}
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
 
       <div className="flex items-center justify-between">
         <div>
@@ -183,7 +187,7 @@ export default function ProjectPage({ params }: PageProps) {
             <CardTitle className="text-base">Kunden & Partner Informationen</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h3 className="font-medium mb-2">Kunde</h3>
                 <div className="text-sm space-y-1">
