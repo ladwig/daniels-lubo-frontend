@@ -23,6 +23,16 @@ import {
 import { Search, Plus } from "lucide-react"
 import Link from "next/link"
 
+type ProjectStatus = "pending" | "in_progress" | "completed" | "on_hold" | "cancelled"
+
+const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  pending: { label: "Ausstehend", variant: "secondary" },
+  in_progress: { label: "In Bearbeitung", variant: "default" },
+  completed: { label: "Abgeschlossen", variant: "default" },
+  on_hold: { label: "Pausiert", variant: "outline" },
+  cancelled: { label: "Storniert", variant: "destructive" },
+}
+
 // Mock data for projects
 const projects = [
   {
@@ -34,7 +44,7 @@ const projects = [
     partner: {
       name: "1Komma5",
     },
-    status: "in_progress",
+    status: "in_progress" as ProjectStatus,
   },
   {
     id: "PRJ002",
@@ -45,7 +55,7 @@ const projects = [
     partner: {
       name: "42Watt",
     },
-    status: "pending",
+    status: "pending" as ProjectStatus,
   },
   {
     id: "PRJ003",
@@ -56,25 +66,226 @@ const projects = [
     partner: {
       name: "Montamo",
     },
-    status: "completed",
+    status: "completed" as ProjectStatus,
   },
+  {
+    id: "PRJ004",
+    customer: {
+      name: "Anna Weber",
+      location: "Cologne",
+    },
+    partner: {
+      name: "1Komma5",
+    },
+    status: "in_progress" as ProjectStatus,
+  },
+  {
+    id: "PRJ005",
+    customer: {
+      name: "Thomas Müller",
+      location: "Frankfurt",
+    },
+    partner: {
+      name: "42Watt",
+    },
+    status: "on_hold" as ProjectStatus,
+  },
+  {
+    id: "PRJ006",
+    customer: {
+      name: "Lisa Schmidt",
+      location: "Dresden",
+    },
+    partner: {
+      name: "Montamo",
+    },
+    status: "completed" as ProjectStatus,
+  },
+  {
+    id: "PRJ007",
+    customer: {
+      name: "Martin Koch",
+      location: "Stuttgart",
+    },
+    partner: {
+      name: "1Komma5",
+    },
+    status: "cancelled" as ProjectStatus,
+  },
+  {
+    id: "PRJ008",
+    customer: {
+      name: "Sarah Wagner",
+      location: "Düsseldorf",
+    },
+    partner: {
+      name: "42Watt",
+    },
+    status: "in_progress" as ProjectStatus,
+  },
+  {
+    id: "PRJ009",
+    customer: {
+      name: "Peter Bauer",
+      location: "Leipzig",
+    },
+    partner: {
+      name: "Montamo",
+    },
+    status: "pending" as ProjectStatus,
+  },
+  {
+    id: "PRJ010",
+    customer: {
+      name: "Julia Fischer",
+      location: "Hannover",
+    },
+    partner: {
+      name: "1Komma5",
+    },
+    status: "completed" as ProjectStatus,
+  },
+  {
+    id: "PRJ011",
+    customer: {
+      name: "Robert Schulz",
+      location: "Nuremberg",
+    },
+    partner: {
+      name: "42Watt",
+    },
+    status: "in_progress" as ProjectStatus,
+  },
+  {
+    id: "PRJ012",
+    customer: {
+      name: "Maria Hoffmann",
+      location: "Bremen",
+    },
+    partner: {
+      name: "Montamo",
+    },
+    status: "on_hold" as ProjectStatus,
+  },
+  {
+    id: "PRJ013",
+    customer: {
+      name: "Andreas Klein",
+      location: "Essen",
+    },
+    partner: {
+      name: "1Komma5",
+    },
+    status: "pending" as ProjectStatus,
+  },
+  {
+    id: "PRJ014",
+    customer: {
+      name: "Sabine Wolf",
+      location: "Dortmund",
+    },
+    partner: {
+      name: "42Watt",
+    },
+    status: "completed" as ProjectStatus,
+  },
+  {
+    id: "PRJ015",
+    customer: {
+      name: "Christian Meyer",
+      location: "Bonn",
+    },
+    partner: {
+      name: "Montamo",
+    },
+    status: "in_progress" as ProjectStatus,
+  },
+  {
+    id: "PRJ016",
+    customer: {
+      name: "Katharina Lang",
+      location: "Münster",
+    },
+    partner: {
+      name: "1Komma5",
+    },
+    status: "cancelled" as ProjectStatus,
+  },
+  {
+    id: "PRJ017",
+    customer: {
+      name: "Daniel Richter",
+      location: "Karlsruhe",
+    },
+    partner: {
+      name: "42Watt",
+    },
+    status: "pending" as ProjectStatus,
+  },
+  {
+    id: "PRJ018",
+    customer: {
+      name: "Laura Krause",
+      location: "Mannheim",
+    },
+    partner: {
+      name: "Montamo",
+    },
+    status: "completed" as ProjectStatus,
+  }
 ]
 
 // Get unique locations from projects
-const locations = [...new Set(projects.map(project => project.customer.location))].sort()
+const locations = Array.from(new Set(projects.map(project => project.customer.location))).sort()
 
 // Mock data for KPIs
-const kpis = {
-  openInstallations: 15,
-  doneInstallations: 45,
-  openReworks: 3,
+const kpiData = {
+  openInstallations: {
+    weekly: {
+      value: 12,
+      trend: "up",
+      percentage: 20
+    },
+    monthly: {
+      value: 45,
+      trend: "up",
+      percentage: 15
+    }
+  },
+  completedInstallations: {
+    weekly: {
+      value: 8,
+      trend: "up",
+      percentage: 25
+    },
+    monthly: {
+      value: 32,
+      trend: "up",
+      percentage: 10
+    }
+  },
+  openRework: {
+    weekly: {
+      value: 3,
+      trend: "down",
+      percentage: -10
+    },
+    monthly: {
+      value: 15,
+      trend: "down",
+      percentage: -5
+    }
+  }
 }
+
+type TimeframeType = "weekly" | "monthly"
 
 export default function ProjectsPage() {
   const [search, setSearch] = useState("")
   const [partnerFilter, setPartnerFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [locationFilter, setLocationFilter] = useState("all")
+  const [timeframe, setTimeframe] = useState<TimeframeType>("weekly")
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = (
@@ -92,42 +303,80 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Projekte</h1>
-        <p className="text-sm text-muted-foreground">
-          Wärmepumpen-Installationsprojekte verwalten
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">Projekte</h1>
+          <p className="text-sm text-muted-foreground">
+            Wärmepumpen-Installationsprojekte verwalten
+          </p>
+        </div>
+        <Select value={timeframe} onValueChange={(value: TimeframeType) => setTimeframe(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Zeitraum wählen" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="weekly">Diese Woche</SelectItem>
+            <SelectItem value="monthly">Dieser Monat</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
               Offene Installationen
             </CardTitle>
+            <Badge variant="outline" className="text-xs font-normal">
+              {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
+            </Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.openInstallations}</div>
+            <div className="text-2xl font-bold">
+              {kpiData.openInstallations[timeframe].value}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {kpiData.openInstallations[timeframe].percentage > 0 ? "+" : ""}
+              {kpiData.openInstallations[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
+            </p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
               Abgeschlossene Installationen
             </CardTitle>
+            <Badge variant="outline" className="text-xs font-normal">
+              {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
+            </Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.doneInstallations}</div>
+            <div className="text-2xl font-bold">
+              {kpiData.completedInstallations[timeframe].value}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {kpiData.completedInstallations[timeframe].percentage > 0 ? "+" : ""}
+              {kpiData.completedInstallations[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
+            </p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
               Offene Nacharbeiten
             </CardTitle>
+            <Badge variant="outline" className="text-xs font-normal">
+              {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
+            </Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.openReworks}</div>
+            <div className="text-2xl font-bold">
+              {kpiData.openRework[timeframe].value}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {kpiData.openRework[timeframe].percentage > 0 ? "+" : ""}
+              {kpiData.openRework[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -192,39 +441,29 @@ export default function ProjectsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Projekt ID</TableHead>
-              <TableHead>Partner</TableHead>
               <TableHead>Kunde</TableHead>
               <TableHead>Standort</TableHead>
+              <TableHead>Partner</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProjects.map((project) => (
               <TableRow key={project.id}>
-                <TableCell className="font-medium">
+                <TableCell>
                   <Link
                     href={`/projects/${project.id}`}
-                    className="hover:text-primary transition-colors"
+                    className="font-medium hover:underline"
                   >
                     {project.id}
                   </Link>
                 </TableCell>
-                <TableCell>{project.partner.name}</TableCell>
                 <TableCell>{project.customer.name}</TableCell>
                 <TableCell>{project.customer.location}</TableCell>
+                <TableCell>{project.partner.name}</TableCell>
                 <TableCell>
-                  <Badge
-                    variant={
-                      project.status === "completed"
-                        ? "default"
-                        : project.status === "in_progress"
-                        ? "secondary"
-                        : "outline"
-                    }
-                  >
-                    {project.status === "completed" ? "Abgeschlossen" : 
-                     project.status === "in_progress" ? "In Bearbeitung" : 
-                     "Ausstehend"}
+                  <Badge variant={statusConfig[project.status].variant}>
+                    {statusConfig[project.status].label}
                   </Badge>
                 </TableCell>
               </TableRow>

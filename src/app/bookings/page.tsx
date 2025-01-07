@@ -2,7 +2,12 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import {
@@ -29,7 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
-import { Calendar, List, Plus, Search, MapPin } from "lucide-react"
+import { Calendar, List, Plus, Search, MapPin, Pencil } from "lucide-react"
 import Link from "next/link"
 import { CraftsmanPill } from "@/components/ui/craftsman-pill"
 import dynamic from "next/dynamic"
@@ -191,6 +196,7 @@ const MapView = dynamic(() => import("@/components/bookings/map-view"), {
 })
 
 type ViewType = "table" | "calendar" | "map"
+type DialogMode = "create" | "edit"
 
 export default function BookingsPage() {
   // View state
@@ -199,7 +205,12 @@ export default function BookingsPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [craftsmanFilter, setCraftsmanFilter] = useState<string>("all")
 
-  // New booking form state
+  // Dialog state
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [dialogMode, setDialogMode] = useState<DialogMode>("create")
+  const [editingBookingId, setEditingBookingId] = useState<string | null>(null)
+
+  // Form state
   const [selectedProject, setSelectedProject] = useState("")
   const [selectedJob, setSelectedJob] = useState("")
   const [createNewJob, setCreateNewJob] = useState(false)
@@ -208,7 +219,6 @@ export default function BookingsPage() {
   const [selectedTime, setSelectedTime] = useState("")
   const [selectedCraftsman, setSelectedCraftsman] = useState("")
   const [notes, setNotes] = useState("")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newJobType, setNewJobType] = useState("standard")
 
   const filteredBookings = bookings.filter(booking => {
@@ -225,29 +235,36 @@ export default function BookingsPage() {
   })
 
   const handleSubmit = () => {
-    // Here you would handle the booking creation
-    console.log({
-      project: selectedProject,
-      job: createNewJob ? {
-        name: newJobName,
-        type: newJobType
-      } : selectedJob,
-      date: selectedDate,
-      time: selectedTime,
-      craftsman: selectedCraftsman,
-      notes,
-    })
+    if (dialogMode === "create") {
+      // Handle creation
+      console.log("Creating new booking:", {
+        project: selectedProject,
+        job: createNewJob ? {
+          name: newJobName,
+          type: newJobType
+        } : selectedJob,
+        date: selectedDate,
+        time: selectedTime,
+        craftsman: selectedCraftsman,
+        notes,
+      })
+    } else {
+      // Handle editing
+      console.log("Updating booking:", {
+        id: editingBookingId,
+        project: selectedProject,
+        job: createNewJob ? {
+          name: newJobName,
+          type: newJobType
+        } : selectedJob,
+        date: selectedDate,
+        time: selectedTime,
+        craftsman: selectedCraftsman,
+        notes,
+      })
+    }
     
-    // Reset form and close dialog
-    setSelectedProject("")
-    setSelectedJob("")
-    setCreateNewJob(false)
-    setNewJobName("")
-    setNewJobType("standard")
-    setSelectedDate("")
-    setSelectedTime("")
-    setSelectedCraftsman("")
-    setNotes("")
+    resetForm()
     setIsDialogOpen(false)
   }
 
@@ -261,6 +278,22 @@ export default function BookingsPage() {
     setSelectedTime("")
     setSelectedCraftsman("")
     setNotes("")
+    setEditingBookingId(null)
+    setDialogMode("create")
+  }
+
+  const handleEdit = (booking: typeof bookings[0]) => {
+    // Set form values based on booking data
+    setSelectedProject(booking.projectId)
+    setSelectedJob(booking.jobId)
+    setCreateNewJob(false)
+    setSelectedDate(booking.date.split(" ")[0])
+    setSelectedTime(booking.date.split(" ")[1])
+    setSelectedCraftsman(booking.craftsmen[0].id) // For simplicity, we'll edit the first craftsman
+    setNewJobType(booking.type)
+    setEditingBookingId(booking.id)
+    setDialogMode("edit")
+    setIsDialogOpen(true)
   }
 
   return (
@@ -348,7 +381,9 @@ export default function BookingsPage() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Neuen Termin erstellen</DialogTitle>
+                <DialogTitle>
+                  {dialogMode === "create" ? "Neuen Termin erstellen" : "Termin bearbeiten"}
+                </DialogTitle>
               </DialogHeader>
               <div className="space-y-6 py-4">
                 <div className="space-y-4">
@@ -493,7 +528,7 @@ export default function BookingsPage() {
                       !selectedCraftsman
                     }
                   >
-                    Termin erstellen
+                    {dialogMode === "create" ? "Termin erstellen" : "Termin aktualisieren"}
                   </Button>
                 </DialogFooter>
               </div>
@@ -513,6 +548,7 @@ export default function BookingsPage() {
                 <TableHead>Typ</TableHead>
                 <TableHead>Handwerker</TableHead>
                 <TableHead>Dauer</TableHead>
+                <TableHead className="w-[50px]">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -558,6 +594,15 @@ export default function BookingsPage() {
                   </TableCell>
                   <TableCell className="text-sm">
                     {booking.duration}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(booking)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
