@@ -145,7 +145,10 @@ interface PageProps {
   }
 }
 
-export default function ProjectPage({ params }: PageProps) {
+export default async function ProjectPage({ params }: PageProps) {
+  // Use the mock data's project ID directly
+  const projectId = projectData.id
+
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -323,7 +326,7 @@ export default function ProjectPage({ params }: PageProps) {
                   <TableRow key={job.id}>
                     <TableCell>
                       <Link
-                        href={`/projects/${params.id}/jobs/${job.id}`}
+                        href={`/projects/PRJ001/jobs/${job.id}`}
                         className="hover:text-primary transition-colors"
                       >
                         {job.name}
