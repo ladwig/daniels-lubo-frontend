@@ -1,0 +1,498 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Label } from "@/components/ui/label"
+import { Calendar, List, Plus, Search } from "lucide-react"
+import Link from "next/link"
+import { CraftsmanPill } from "@/components/ui/craftsman-pill"
+
+// Mock data for bookings
+const bookings = [
+  {
+    id: "B1",
+    date: "2024-02-15 09:00",
+    duration: "2 hours",
+    projectId: "PRJ001",
+    jobId: "J1",
+    jobName: "Site Survey",
+    type: "standard",
+    craftsmen: [
+      { id: "C1", name: "Mike Brown", role: "Surveyor" }
+    ],
+  },
+  {
+    id: "B2",
+    date: "2024-02-20 08:30",
+    duration: "6 hours",
+    projectId: "PRJ002",
+    jobId: "J2",
+    jobName: "Ground Work",
+    type: "standard",
+    craftsmen: [
+      { id: "C2", name: "Steve Wilson", role: "Lead Installer" },
+      { id: "C3", name: "John Smith", role: "Assistant" }
+    ],
+  },
+  {
+    id: "B3",
+    date: "2024-02-25 10:00",
+    duration: "4 hours",
+    projectId: "PRJ001",
+    jobId: "J3",
+    jobName: "Heat Pump Installation",
+    type: "rework",
+    craftsmen: [
+      { id: "C4", name: "Tom Davis", role: "Lead Installer" },
+      { id: "C5", name: "Alex Johnson", role: "Specialist" }
+    ],
+  },
+]
+
+// Mock data for projects
+const projects = [
+  {
+    id: "PRJ001",
+    name: "Heat Pump Installation - John Doe",
+    jobs: [
+      { id: "J1", name: "Site Survey" },
+      { id: "J2", name: "Installation" },
+    ],
+  },
+  {
+    id: "PRJ002",
+    name: "Solar Panel Setup - Jane Smith",
+    jobs: [
+      { id: "J3", name: "Initial Assessment" },
+      { id: "J4", name: "Panel Installation" },
+    ],
+  },
+]
+
+// Mock data for craftsmen
+const craftsmen = [
+  { id: "C1", name: "Mike Brown" },
+  { id: "C2", name: "Steve Wilson" },
+  { id: "C3", name: "John Smith" },
+  { id: "C4", name: "Tom Davis" },
+  { id: "C5", name: "Alex Johnson" },
+]
+
+type ViewType = "table" | "calendar"
+
+export default function BookingsPage() {
+  // View state
+  const [view, setView] = useState<ViewType>("table")
+  const [search, setSearch] = useState("")
+  const [typeFilter, setTypeFilter] = useState<string>("all")
+  const [craftsmanFilter, setCraftsmanFilter] = useState<string>("all")
+
+  // New booking form state
+  const [selectedProject, setSelectedProject] = useState("")
+  const [selectedJob, setSelectedJob] = useState("")
+  const [createNewJob, setCreateNewJob] = useState(false)
+  const [newJobName, setNewJobName] = useState("")
+  const [selectedDate, setSelectedDate] = useState("")
+  const [selectedTime, setSelectedTime] = useState("")
+  const [selectedCraftsman, setSelectedCraftsman] = useState("")
+  const [notes, setNotes] = useState("")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [newJobType, setNewJobType] = useState("standard")
+
+  const filteredBookings = bookings.filter(booking => {
+    const matchesSearch = (
+      booking.projectId.toLowerCase().includes(search.toLowerCase()) ||
+      booking.jobName.toLowerCase().includes(search.toLowerCase()) ||
+      booking.craftsmen.some(c => c.name.toLowerCase().includes(search.toLowerCase()))
+    )
+    const matchesType = typeFilter === "all" || booking.type === typeFilter
+    const matchesCraftsman = craftsmanFilter === "all" || 
+      booking.craftsmen.some(c => c.id === craftsmanFilter)
+
+    return matchesSearch && matchesType && matchesCraftsman
+  })
+
+  const handleSubmit = () => {
+    // Here you would handle the booking creation
+    console.log({
+      project: selectedProject,
+      job: createNewJob ? {
+        name: newJobName,
+        type: newJobType
+      } : selectedJob,
+      date: selectedDate,
+      time: selectedTime,
+      craftsman: selectedCraftsman,
+      notes,
+    })
+    
+    // Reset form and close dialog
+    setSelectedProject("")
+    setSelectedJob("")
+    setCreateNewJob(false)
+    setNewJobName("")
+    setNewJobType("standard")
+    setSelectedDate("")
+    setSelectedTime("")
+    setSelectedCraftsman("")
+    setNotes("")
+    setIsDialogOpen(false)
+  }
+
+  const resetForm = () => {
+    setSelectedProject("")
+    setSelectedJob("")
+    setCreateNewJob(false)
+    setNewJobName("")
+    setNewJobType("standard")
+    setSelectedDate("")
+    setSelectedTime("")
+    setSelectedCraftsman("")
+    setNotes("")
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Termine</h1>
+          <p className="text-sm text-muted-foreground">
+            Termine und Handwerker-Zeitpläne verwalten
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={view === "table" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setView("table")}
+          >
+            <List className="h-4 w-4 mr-1" />
+            Tabellenansicht
+          </Button>
+          <Button
+            variant={view === "calendar" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setView("calendar")}
+          >
+            <Calendar className="h-4 w-4 mr-1" />
+            Kalenderansicht
+          </Button>
+        </div>
+      </div>
+
+      <Card className="p-4">
+        <div className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Projekte, Aufträge oder Handwerker suchen..."
+                className="pl-8"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Nach Typ filtern" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Typen</SelectItem>
+              <SelectItem value="standard">Standard</SelectItem>
+              <SelectItem value="rework">Nacharbeit</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={craftsmanFilter} onValueChange={setCraftsmanFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Nach Handwerker filtern" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Handwerker</SelectItem>
+              {craftsmen.map((craftsman) => (
+                <SelectItem key={craftsman.id} value={craftsman.id}>
+                  {craftsman.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open)
+            if (!open) resetForm()
+          }}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Neuer Termin
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Neuen Termin erstellen</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6 py-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Projekt auswählen</Label>
+                    <Select value={selectedProject} onValueChange={setSelectedProject}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Projekt auswählen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {projects.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedProject && (
+                    <div className="space-y-2">
+                      <Label>Auftrag auswählen</Label>
+                      <Select
+                        value={selectedJob}
+                        onValueChange={(value) => {
+                          if (value === "new") {
+                            setCreateNewJob(true)
+                            setSelectedJob("")
+                          } else {
+                            setCreateNewJob(false)
+                            setSelectedJob(value)
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Auftrag auswählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {projects
+                            .find((p) => p.id === selectedProject)
+                            ?.jobs.map((job) => (
+                              <SelectItem key={job.id} value={job.id}>
+                                {job.name}
+                              </SelectItem>
+                            ))}
+                          <SelectItem value="new">
+                            <div className="flex items-center">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Neuer Auftrag
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {createNewJob && (
+                        <div className="space-y-4 mt-4">
+                          <div className="space-y-2">
+                            <Label>Auftragsname</Label>
+                            <Input
+                              placeholder="Auftragsnamen eingeben"
+                              value={newJobName}
+                              onChange={(e) => setNewJobName(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Auftragstyp</Label>
+                            <Select
+                              value={newJobType}
+                              onValueChange={setNewJobType}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Auftragstyp auswählen" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="standard">Standard</SelectItem>
+                                <SelectItem value="rework">Nacharbeit</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {(selectedJob || (createNewJob && newJobName)) && (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Datum</Label>
+                          <Input
+                            type="date"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Uhrzeit</Label>
+                          <Input
+                            type="time"
+                            value={selectedTime}
+                            onChange={(e) => setSelectedTime(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Handwerker zuweisen</Label>
+                        <Select value={selectedCraftsman} onValueChange={setSelectedCraftsman}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Handwerker auswählen" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {craftsmen.map((craftsman) => (
+                              <SelectItem key={craftsman.id} value={craftsman.id}>
+                                {craftsman.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Notizen</Label>
+                        <Input
+                          placeholder="Zusätzliche Notizen hinzufügen"
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={
+                      !selectedProject ||
+                      (!selectedJob && (!createNewJob || !newJobName)) ||
+                      !selectedDate ||
+                      !selectedTime ||
+                      !selectedCraftsman
+                    }
+                  >
+                    Termin erstellen
+                  </Button>
+                </DialogFooter>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </Card>
+
+      {view === "table" ? (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Datum & Uhrzeit</TableHead>
+                <TableHead>Projekt</TableHead>
+                <TableHead>Auftrag</TableHead>
+                <TableHead>Typ</TableHead>
+                <TableHead>Handwerker</TableHead>
+                <TableHead>Dauer</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredBookings.map((booking) => (
+                <TableRow key={booking.id}>
+                  <TableCell className="font-medium text-sm">
+                    {booking.date}
+                  </TableCell>
+                  <TableCell>
+                    <Link
+                      href={`/projects/${booking.projectId}`}
+                      className="text-sm hover:text-primary transition-colors"
+                    >
+                      {booking.projectId}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Link
+                      href={`/projects/${booking.projectId}/jobs/${booking.jobId}`}
+                      className="text-sm hover:text-primary transition-colors"
+                    >
+                      {booking.jobName}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={booking.type === "rework" ? "destructive" : "secondary"}
+                      className="text-xs"
+                    >
+                      {booking.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {booking.craftsmen.map((craftsman) => (
+                        <CraftsmanPill
+                          key={craftsman.id}
+                          id={craftsman.id}
+                          name={craftsman.name}
+                        />
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {booking.duration}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      ) : (
+        <Card className="p-6">
+          <div className="h-[800px] grid grid-cols-[200px_1fr]">
+            <div className="border-r pr-4">
+              <h3 className="font-medium mb-4">Handwerker</h3>
+              <div className="space-y-2">
+                {craftsmen.map((craftsman) => (
+                  <div key={craftsman.id} className="text-sm">
+                    <div className="font-medium">{craftsman.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="pl-4">
+              <div className="text-center text-muted-foreground text-sm">
+                Kalenderansicht wird mit einem Kalender-Framework implementiert.
+                <br />
+                Mock-Ereignisdaten sind im Code verfügbar.
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  )
+} 
