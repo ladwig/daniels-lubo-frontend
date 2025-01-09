@@ -1,3 +1,5 @@
+"use client"
+
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,7 +35,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { Clock, Wrench, Upload, FileText, Eye, Plus } from "lucide-react"
+import { Clock, Wrench, Upload, FileText, Eye, Plus, Smartphone, ArrowLeft } from "lucide-react"
 import { CraftsmanPill } from "@/components/ui/craftsman-pill"
 
 // Mock data for a project
@@ -145,266 +147,285 @@ interface PageProps {
   }
 }
 
-export default async function ProjectPage({ params }: PageProps) {
+export default function ProjectPage({ params }: PageProps) {
   // Use the mock data's project ID directly
   const projectId = projectData.id
 
   return (
-    <div className="space-y-6">
-      <Breadcrumb>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/projects">Projekte</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem isCurrentPage>
-          <BreadcrumbLink>
-            {projectData.customer.name} - {projectData.id}
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
+    <div className="relative">
+      {/* Back to Web Button - Fixed Position */}
+      <Link
+        href={`/projects/${params.id}`}
+        className="fixed top-4 left-4 z-50 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-50 transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span>Back to Web</span>
+      </Link>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Projektdetails</h1>
-          <p className="text-sm text-muted-foreground">
-            Projekt ID: {projectData.id}
-          </p>
+      <div className="space-y-6">
+        <Breadcrumb>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/projects">Projekte</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem isCurrentPage>
+            <BreadcrumbLink>
+              {projectData.customer.name} - {projectData.id}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Projektdetails</h1>
+            <p className="text-sm text-muted-foreground">
+              Projekt ID: {projectData.id}
+            </p>
+          </div>
+          <Badge
+            variant={
+              projectData.status === "completed"
+                ? "default"
+                : projectData.status === "in_progress"
+                ? "secondary"
+                : "outline"
+            }
+          >
+            {projectData.status === "completed" ? "Abgeschlossen" : 
+             projectData.status === "in_progress" ? "In Bearbeitung" : 
+             "Ausstehend"}
+          </Badge>
         </div>
-        <Badge
-          variant={
-            projectData.status === "completed"
-              ? "default"
-              : projectData.status === "in_progress"
-              ? "secondary"
-              : "outline"
-          }
-        >
-          {projectData.status === "completed" ? "Abgeschlossen" : 
-           projectData.status === "in_progress" ? "In Bearbeitung" : 
-           "Ausstehend"}
-        </Badge>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Kunden & Partner Informationen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-medium mb-2">Kunde</h3>
-                <div className="text-sm space-y-1">
-                  <p>{projectData.customer.name}</p>
-                  <p className="text-muted-foreground">{projectData.customer.email}</p>
-                  <p className="text-muted-foreground">{projectData.customer.phone}</p>
-                  <p className="text-muted-foreground">{projectData.customer.address}</p>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-medium mb-2">Partner</h3>
-                <div className="text-sm space-y-1">
-                  <p>{projectData.partner.name}</p>
-                  <p className="text-muted-foreground">Kontakt: {projectData.partner.contact}</p>
-                  <p className="text-muted-foreground">{projectData.partner.email}</p>
-                  <p className="text-muted-foreground">{projectData.partner.phone}</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Systeminformationen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="grid grid-cols-2">
-                <span className="text-muted-foreground">Typ</span>
-                <span>{projectData.system.type}</span>
-              </div>
-              <div className="grid grid-cols-2">
-                <span className="text-muted-foreground">Modell</span>
-                <span>{projectData.system.model}</span>
-              </div>
-              <div className="grid grid-cols-2">
-                <span className="text-muted-foreground">Leistung</span>
-                <span>{projectData.system.capacity}</span>
-              </div>
-              <div className="grid grid-cols-2">
-                <span className="text-muted-foreground">Installationsart</span>
-                <span>{projectData.system.installation}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="jobs">
-        <TabsList>
-          <TabsTrigger value="jobs">Aufträge</TabsTrigger>
-          <TabsTrigger value="documents">Dokumente</TabsTrigger>
-        </TabsList>
-        <TabsContent value="jobs">
+        <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Projektaufträge</CardTitle>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Neuer Auftrag
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Neuen Auftrag erstellen</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="jobName">Auftragsname</Label>
-                        <Input id="jobName" placeholder="Auftragsnamen eingeben" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="duration">Dauer</Label>
-                        <Input id="duration" placeholder="z.B. 2 Stunden" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Handwerker zuweisen</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Handwerker auswählen" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableCraftsmen.map((craftsman) => (
-                              <SelectItem key={craftsman.id} value={craftsman.id}>
-                                {craftsman.name} ({craftsman.role})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground">
-                          Weitere Handwerker können nach der Erstellung des Auftrags zugewiesen werden
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Anfangsstatus</Label>
-                        <Select defaultValue="pending">
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Ausstehend</SelectItem>
-                            <SelectItem value="in_progress">In Bearbeitung</SelectItem>
-                            <SelectItem value="completed">Abgeschlossen</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="pt-4">
-                        <Button className="w-full">
-                          Auftrag erstellen
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+              <CardTitle className="text-base">Kunden & Partner Informationen</CardTitle>
             </CardHeader>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Handwerker</TableHead>
-                  <TableHead>Termin</TableHead>
-                  <TableHead>Dauer</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projectData.jobs.map((job) => (
-                  <TableRow key={job.id}>
-                    <TableCell>
-                      <Link
-                        href={`/projects/PRJ001/jobs/${job.id}`}
-                        className="hover:text-primary transition-colors"
-                      >
-                        {job.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          job.status === "completed"
-                            ? "default"
-                            : job.status === "in_progress"
-                            ? "secondary"
-                            : "outline"
-                        }
-                      >
-                        {job.status === "completed" ? "Abgeschlossen" : 
-                         job.status === "in_progress" ? "In Bearbeitung" : 
-                         "Ausstehend"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {job.craftsmen.map((craftsman) => (
-                          <CraftsmanPill
-                            key={craftsman.id}
-                            id={craftsman.id}
-                            name={craftsman.name}
-                          />
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>{job.appointment || "Nicht geplant"}</TableCell>
-                    <TableCell>{job.duration}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-medium mb-2">Kunde</h3>
+                  <div className="text-sm space-y-1">
+                    <p>{projectData.customer.name}</p>
+                    <p className="text-muted-foreground">{projectData.customer.email}</p>
+                    <p className="text-muted-foreground">{projectData.customer.phone}</p>
+                    <p className="text-muted-foreground">{projectData.customer.address}</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-medium mb-2">Partner</h3>
+                  <div className="text-sm space-y-1">
+                    <p>{projectData.partner.name}</p>
+                    <p className="text-muted-foreground">Kontakt: {projectData.partner.contact}</p>
+                    <p className="text-muted-foreground">{projectData.partner.email}</p>
+                    <p className="text-muted-foreground">{projectData.partner.phone}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
           </Card>
-        </TabsContent>
-        <TabsContent value="documents">
+
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Projektdokumente</CardTitle>
-                <Button>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Dokument hochladen
-                </Button>
-              </div>
+              <CardTitle className="text-base">Systeminformationen</CardTitle>
             </CardHeader>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Aktionen</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projectData.documents.map((doc) => (
-                  <TableRow key={doc.id}>
-                    <TableCell>{doc.name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="grid grid-cols-2">
+                  <span className="text-muted-foreground">Typ</span>
+                  <span>{projectData.system.type}</span>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-muted-foreground">Modell</span>
+                  <span>{projectData.system.model}</span>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-muted-foreground">Leistung</span>
+                  <span>{projectData.system.capacity}</span>
+                </div>
+                <div className="grid grid-cols-2">
+                  <span className="text-muted-foreground">Installationsart</span>
+                  <span>{projectData.system.installation}</span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+
+        <Tabs defaultValue="jobs">
+          <TabsList>
+            <TabsTrigger value="jobs">Aufträge</TabsTrigger>
+            <TabsTrigger value="documents">Dokumente</TabsTrigger>
+          </TabsList>
+          <TabsContent value="jobs">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Projektaufträge</CardTitle>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Neuer Auftrag
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Neuen Auftrag erstellen</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="jobName">Auftragsname</Label>
+                          <Input id="jobName" placeholder="Auftragsnamen eingeben" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="duration">Dauer</Label>
+                          <Input id="duration" placeholder="z.B. 2 Stunden" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Handwerker zuweisen</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Handwerker auswählen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableCraftsmen.map((craftsman) => (
+                                <SelectItem key={craftsman.id} value={craftsman.id}>
+                                  {craftsman.name} ({craftsman.role})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">
+                            Weitere Handwerker können nach der Erstellung des Auftrags zugewiesen werden
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Anfangsstatus</Label>
+                          <Select defaultValue="pending">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Ausstehend</SelectItem>
+                              <SelectItem value="in_progress">In Bearbeitung</SelectItem>
+                              <SelectItem value="completed">Abgeschlossen</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="pt-4">
+                          <Button className="w-full">
+                            Auftrag erstellen
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Handwerker</TableHead>
+                    <TableHead>Termin</TableHead>
+                    <TableHead>Dauer</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {projectData.jobs.map((job) => (
+                    <TableRow key={job.id}>
+                      <TableCell>
+                        <Link
+                          href={`/projects/PRJ001/jobs/${job.id}`}
+                          className="hover:text-primary transition-colors"
+                        >
+                          {job.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            job.status === "completed"
+                              ? "default"
+                              : job.status === "in_progress"
+                              ? "secondary"
+                              : "outline"
+                          }
+                        >
+                          {job.status === "completed" ? "Abgeschlossen" : 
+                           job.status === "in_progress" ? "In Bearbeitung" : 
+                           "Ausstehend"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {job.craftsmen.map((craftsman) => (
+                            <CraftsmanPill
+                              key={craftsman.id}
+                              id={craftsman.id}
+                              name={craftsman.name}
+                            />
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>{job.appointment || "Nicht geplant"}</TableCell>
+                      <TableCell>{job.duration}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+          <TabsContent value="documents">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Projektdokumente</CardTitle>
+                  <Button>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Dokument hochladen
+                  </Button>
+                </div>
+              </CardHeader>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Aktionen</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {projectData.documents.map((doc) => (
+                    <TableRow key={doc.id}>
+                      <TableCell>{doc.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Mobile Version Link */}
+      <Link
+        href={`/mobile/projects/${params.id}`}
+        className="fixed bottom-6 right-6 bg-[#FEDC00] text-white p-3 rounded-full shadow-lg hover:bg-[#E5C700] active:bg-[#D1B600] transition-colors"
+      >
+        <Smartphone className="w-6 h-6" />
+      </Link>
     </div>
   )
 } 

@@ -6,7 +6,7 @@ export default function InventoryPage() {
   return (
     <div className="flex flex-col h-full">
       {/* App Bar */}
-      <div className="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
+      <div className="bg-gray-50 border-b px-4 py-3 flex items-center">
         <span className="text-gray-900 text-lg font-medium">Inventar</span>
       </div>
 

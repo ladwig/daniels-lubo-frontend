@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search, Plus } from "lucide-react"
+import { Search, Plus, Smartphone } from "lucide-react"
 import Link from "next/link"
 
 type ProjectStatus = "pending" | "in_progress" | "completed" | "on_hold" | "cancelled"
@@ -302,175 +302,185 @@ export default function ProjectsPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Projekte</h1>
-          <p className="text-sm text-muted-foreground">
-            Wärmepumpen-Installationsprojekte verwalten
-          </p>
-        </div>
-        <Select value={timeframe} onValueChange={(value: TimeframeType) => setTimeframe(value)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Zeitraum wählen" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="weekly">Diese Woche</SelectItem>
-            <SelectItem value="monthly">Dieser Monat</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Offene Installationen
-            </CardTitle>
-            <Badge variant="outline" className="text-xs font-normal">
-              {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
-            </Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {kpiData.openInstallations[timeframe].value}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {kpiData.openInstallations[timeframe].percentage > 0 ? "+" : ""}
-              {kpiData.openInstallations[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
+    <div className="relative">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Projekte</h1>
+            <p className="text-sm text-muted-foreground">
+              Wärmepumpen-Installationsprojekte verwalten
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Abgeschlossene Installationen
-            </CardTitle>
-            <Badge variant="outline" className="text-xs font-normal">
-              {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
-            </Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {kpiData.completedInstallations[timeframe].value}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {kpiData.completedInstallations[timeframe].percentage > 0 ? "+" : ""}
-              {kpiData.completedInstallations[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Offene Nacharbeiten
-            </CardTitle>
-            <Badge variant="outline" className="text-xs font-normal">
-              {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
-            </Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {kpiData.openRework[timeframe].value}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {kpiData.openRework[timeframe].percentage > 0 ? "+" : ""}
-              {kpiData.openRework[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="p-4">
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Projekte, Kunden oder Standorte suchen..."
-                className="pl-8"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
           </div>
-          <Select value={partnerFilter} onValueChange={setPartnerFilter}>
+          <Select value={timeframe} onValueChange={(value: TimeframeType) => setTimeframe(value)}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Nach Partner filtern" />
+              <SelectValue placeholder="Zeitraum wählen" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle Partner</SelectItem>
-              <SelectItem value="1Komma5">1Komma5</SelectItem>
-              <SelectItem value="42Watt">42Watt</SelectItem>
-              <SelectItem value="Montamo">Montamo</SelectItem>
+              <SelectItem value="weekly">Diese Woche</SelectItem>
+              <SelectItem value="monthly">Dieser Monat</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={locationFilter} onValueChange={setLocationFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Nach Standort filtern" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle Standorte</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location} value={location}>
-                  {location}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Nach Status filtern" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle Status</SelectItem>
-              <SelectItem value="pending">Ausstehend</SelectItem>
-              <SelectItem value="in_progress">In Bearbeitung</SelectItem>
-              <SelectItem value="completed">Abgeschlossen</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button>
-            <Plus className="h-4 w-4 mr-1" />
-            Neues Projekt
-          </Button>
         </div>
-      </Card>
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Projekt ID</TableHead>
-              <TableHead>Kunde</TableHead>
-              <TableHead>Standort</TableHead>
-              <TableHead>Partner</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProjects.map((project) => (
-              <TableRow key={project.id}>
-                <TableCell>
-                  <Link
-                    href={`/projects/${project.id}`}
-                    className="font-medium hover:underline"
-                  >
-                    {project.id}
-                  </Link>
-                </TableCell>
-                <TableCell>{project.customer.name}</TableCell>
-                <TableCell>{project.customer.location}</TableCell>
-                <TableCell>{project.partner.name}</TableCell>
-                <TableCell>
-                  <Badge variant={statusConfig[project.status].variant}>
-                    {statusConfig[project.status].label}
-                  </Badge>
-                </TableCell>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Offene Installationen
+              </CardTitle>
+              <Badge variant="outline" className="text-xs font-normal">
+                {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {kpiData.openInstallations[timeframe].value}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {kpiData.openInstallations[timeframe].percentage > 0 ? "+" : ""}
+                {kpiData.openInstallations[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Abgeschlossene Installationen
+              </CardTitle>
+              <Badge variant="outline" className="text-xs font-normal">
+                {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {kpiData.completedInstallations[timeframe].value}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {kpiData.completedInstallations[timeframe].percentage > 0 ? "+" : ""}
+                {kpiData.completedInstallations[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Offene Nacharbeiten
+              </CardTitle>
+              <Badge variant="outline" className="text-xs font-normal">
+                {timeframe === "weekly" ? "Diese Woche" : "Dieser Monat"}
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {kpiData.openRework[timeframe].value}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {kpiData.openRework[timeframe].percentage > 0 ? "+" : ""}
+                {kpiData.openRework[timeframe].percentage}% gegenüber {timeframe === "weekly" ? "Vorwoche" : "Vormonat"}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="p-4">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Projekte, Kunden oder Standorte suchen..."
+                  className="pl-8"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+            </div>
+            <Select value={partnerFilter} onValueChange={setPartnerFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Nach Partner filtern" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle Partner</SelectItem>
+                <SelectItem value="1Komma5">1Komma5</SelectItem>
+                <SelectItem value="42Watt">42Watt</SelectItem>
+                <SelectItem value="Montamo">Montamo</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Nach Standort filtern" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle Standorte</SelectItem>
+                {locations.map((location) => (
+                  <SelectItem key={location} value={location}>
+                    {location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Nach Status filtern" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle Status</SelectItem>
+                <SelectItem value="pending">Ausstehend</SelectItem>
+                <SelectItem value="in_progress">In Bearbeitung</SelectItem>
+                <SelectItem value="completed">Abgeschlossen</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="h-4 w-4 mr-1" />
+              Neues Projekt
+            </Button>
+          </div>
+        </Card>
+
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Projekt ID</TableHead>
+                <TableHead>Kunde</TableHead>
+                <TableHead>Standort</TableHead>
+                <TableHead>Partner</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+            </TableHeader>
+            <TableBody>
+              {filteredProjects.map((project) => (
+                <TableRow key={project.id}>
+                  <TableCell>
+                    <Link
+                      href={`/projects/${project.id}`}
+                      className="font-medium hover:underline"
+                    >
+                      {project.id}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{project.customer.name}</TableCell>
+                  <TableCell>{project.customer.location}</TableCell>
+                  <TableCell>{project.partner.name}</TableCell>
+                  <TableCell>
+                    <Badge variant={statusConfig[project.status].variant}>
+                      {statusConfig[project.status].label}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
+
+      {/* Mobile Version Link */}
+      <Link
+        href="/mobile"
+        className="fixed bottom-6 right-6 bg-[#FEDC00] text-white p-3 rounded-full shadow-lg hover:bg-[#E5C700] active:bg-[#D1B600] transition-colors"
+      >
+        <Smartphone className="w-6 h-6" />
+      </Link>
     </div>
   )
 } 
