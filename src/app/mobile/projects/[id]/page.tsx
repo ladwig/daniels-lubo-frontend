@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, Cloud, ChevronRight } from "lucide-react"
+import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, Cloud, Play } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
+import { TasksOverviewSheet } from "@/components/mobile/tasks-overview-sheet"
 
 type SubTaskType = "checkbox" | "photo" | "text" | "select"
 
@@ -99,14 +100,10 @@ interface SubTaskFormData {
 
 export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>("customer")
-  const [expandedTask, setExpandedTask] = useState<string | null>(null)
-
-  const toggleTask = (taskId: string) => {
-    setExpandedTask(expandedTask === taskId ? null : taskId)
-  }
+  const [isTasksVisible, setIsTasksVisible] = useState(false)
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-w-md mx-auto bg-white relative">
       {/* App Bar */}
       <div className="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -238,75 +235,42 @@ export default function ProjectDetailPage() {
           )}
         </div>
 
-        {/* Tasks Section - Always Visible */}
-        <div className="mt-4 px-4 pb-4">
-          <div className="bg-white rounded-xl shadow-sm divide-y">
-            <div className="p-4">
-              <h3 className="font-medium flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
-                Aufgaben
-              </h3>
-            </div>
-            {projectData.tasks.map((task) => (
-              <div key={task.id}>
-                <button
-                  onClick={() => toggleTask(task.id)}
-                  className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <CheckCircle 
-                      className={`w-5 h-5 ${
-                        task.status === 'completed' 
-                          ? 'text-green-500' 
-                          : 'text-gray-300'
-                      }`} 
-                    />
-                    <span className={
-                      task.status === 'completed' 
-                        ? 'line-through text-gray-500' 
-                        : 'text-gray-900'
-                    }>
-                      {task.title}
-                    </span>
-                  </div>
-                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedTask === task.id ? 'rotate-90' : ''}`} />
-                </button>
-                {expandedTask === task.id && (
-                  <div className="bg-gray-50 px-4 py-2">
-                    <div className="space-y-2">
-                      {task.subTasks.map((subTask) => (
-                        <Link
-                          key={subTask.id}
-                          href={`/mobile/projects/${projectData.id}/sub-job/${subTask.id}`}
-                          className="w-full flex items-center justify-between p-2 rounded-lg bg-white hover:bg-gray-100"
-                        >
-                          <div className="flex items-center gap-3">
-                            <CheckCircle 
-                              className={`w-4 h-4 ${
-                                subTask.status === 'completed' 
-                                  ? 'text-green-500' 
-                                  : 'text-gray-300'
-                              }`} 
-                            />
-                            <span className={
-                              subTask.status === 'completed' 
-                                ? 'line-through text-gray-500' 
-                                : 'text-gray-900'
-                            }>
-                              {subTask.title}
-                            </span>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-gray-400" />
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Start Job Button */}
+        <div className="p-4 bg-white border-b">
+          <button 
+            className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600] flex items-center justify-center gap-2"
+            onClick={() => {
+              const firstIncompleteTask = projectData.tasks.find(t => t.status === 'pending')
+              if (firstIncompleteTask && firstIncompleteTask.subTasks.length > 0) {
+                window.location.href = `/mobile/projects/${projectData.id}/sub-job/${firstIncompleteTask.subTasks[0].id}`
+              }
+            }}
+          >
+            <Play className="w-5 h-5" />
+            <span>Job starten</span>
+          </button>
+        </div>
+
+        {/* Tasks Overview Button */}
+        <div className="p-4">
+          <button
+            onClick={() => setIsTasksVisible(true)}
+            className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-medium hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center gap-2"
+          >
+            <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
+            <span>Aufgaben anzeigen</span>
+          </button>
         </div>
       </div>
+
+      {/* Tasks Overview Sheet */}
+      {isTasksVisible && (
+        <TasksOverviewSheet
+          tasks={projectData.tasks}
+          projectId={projectData.id}
+          onClose={() => setIsTasksVisible(false)}
+        />
+      )}
 
       <NavigationBar />
     </div>
