@@ -1,8 +1,36 @@
 "use client"
 
-import Link from "next/link"
-import { MapPin, Calendar, FileText, ChevronRight, ArrowLeft, Cloud } from "lucide-react"
+import { useState } from "react"
+import { Cloud } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
+import { JobCard } from "@/components/mobile/job-card"
+import { CompletedJobCard } from "@/components/mobile/completed-job-card"
+
+function SyncIcon() {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleClick = () => {
+    if (!isLoading) {
+      setIsLoading(true)
+      setTimeout(() => setIsLoading(false), 1000)
+    }
+  }
+
+  return (
+    <button 
+      onClick={handleClick}
+      className="relative w-5 h-5"
+      aria-label="Sync"
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <div className="w-full h-full border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+      ) : (
+        <Cloud className="w-5 h-5 text-green-500" />
+      )}
+    </button>
+  )
+}
 
 // Mock data for jobs
 const jobsData = {
@@ -70,85 +98,13 @@ const jobsData = {
   ]
 }
 
-// Helper function to get background color based on job type
-const getTypeColor = (type: string) => {
-  switch (type) {
-    case "Installation":
-      return "bg-blue-100 text-blue-700"
-    case "Isolierung":
-      return "bg-purple-100 text-purple-700"
-    case "Gala":
-      return "bg-green-100 text-green-700"
-    default:
-      return "bg-gray-100 text-gray-700"
-  }
-}
-
-// Job card component to avoid repetition
-const JobCard = ({ job }: { job: typeof jobsData.today[0] }) => (
-  <Link 
-    href={`/mobile/projects/${job.projectId}`}
-    key={job.id}
-    className="block"
-  >
-    <div className="bg-white rounded-xl p-4 shadow-sm">
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h3 className="font-medium">{job.customerName}, {job.partner}</h3>
-        </div>
-        <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(job.type)}`}>
-          {job.type}
-        </span>
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center text-gray-500">
-          <MapPin className="w-4 h-4 mr-2" />
-          <span className="text-sm">{job.location}</span>
-        </div>
-        <div className="flex items-center text-gray-500">
-          <Calendar className="w-4 h-4 mr-2" />
-          <span className="text-sm">{job.date}</span>
-        </div>
-      </div>
-    </div>
-  </Link>
-)
-
-// Completed job card with protocol
-const CompletedJobCard = ({ job }: { job: typeof jobsData.completed[0] }) => (
-  <div className="bg-white rounded-xl p-4 shadow-sm">
-    <div className="flex justify-between items-start mb-3">
-      <div>
-        <h3 className="font-medium">{job.customerName}, {job.partner}</h3>
-        <div className="flex items-center text-gray-500 mt-1">
-          <Calendar className="w-4 h-4 mr-2" />
-          <span className="text-sm">{job.date}</span>
-        </div>
-      </div>
-      <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(job.type)}`}>
-        {job.type}
-      </span>
-    </div>
-    <Link 
-      href={`/mobile/projects/${job.projectId}/protocol`}
-      className="flex items-center justify-between mt-3 p-2 bg-gray-50 rounded-lg active:bg-gray-100"
-    >
-      <div className="flex items-center text-gray-600">
-        <FileText className="w-4 h-4 mr-2 text-[#FEDC00]" />
-        <span className="text-sm">Protokoll ansehen</span>
-      </div>
-      <ChevronRight className="w-4 h-4 text-gray-400" />
-    </Link>
-  </div>
-)
-
 export default function MobilePage() {
   return (
     <div className="flex flex-col h-full">
       {/* App Bar */}
       <div className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <span className="text-gray-900 text-lg font-medium">Deine Jobs</span>
-        <Cloud className="w-5 h-5 text-green-500" />
+        <SyncIcon />
       </div>
 
       {/* Content */}
