@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, MapPin, Wrench, Trophy, Star } from "lucide-react"
+import { LogOut, MapPin, Wrench, Trophy, Star, Cloud } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
 
 // Mock user data
@@ -40,10 +40,7 @@ export default function ProfilePage() {
       {/* App Bar */}
       <div className="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
         <span className="text-gray-900 text-lg font-medium">Profil</span>
-        <button className="bg-[#FEDC00] text-white px-3 py-1.5 rounded-lg flex items-center gap-2 hover:bg-[#E5C700] active:bg-[#D1B600]">
-          <LogOut className="w-4 h-4" />
-          <span className="text-sm font-medium">Logout</span>
-        </button>
+        <Cloud className="w-5 h-5 text-green-500" />
       </div>
 
       {/* Content */}
@@ -110,6 +107,14 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Logout Button */}
+        <div className="p-4 border-t">
+          <button className="w-full bg-red-500 text-white px-4 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-red-600 active:bg-red-700">
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Logout</span>
+          </button>
         </div>
       </div>
 

@@ -2,10 +2,27 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft } from "lucide-react"
+import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, Cloud, ChevronRight } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
 
-// Mock data for project details
+type SubTaskType = "checkbox" | "photo" | "text" | "select"
+
+interface SubTask {
+  id: string
+  title: string
+  type: SubTaskType
+  status: "completed" | "pending"
+  options?: string[]
+}
+
+interface Task {
+  id: string
+  title: string
+  status: "completed" | "pending"
+  subTasks: SubTask[]
+}
+
+// Updated mock data with sub-tasks
 const projectData = {
   id: "PRJ001",
   customer: {
@@ -26,28 +43,81 @@ const projectData = {
     { id: "3", name: "Wärmepumpen-Datenblatt.pdf", date: "03.02.2024", type: "Technik" }
   ],
   tasks: [
-    { id: "1", title: "Vorbereitung der Baustelle", status: "completed" },
-    { id: "2", title: "Installation der Wärmepumpe", status: "pending" },
-    { id: "3", title: "Elektrische Anschlüsse", status: "pending" },
-    { id: "4", title: "Endabnahme", status: "pending" }
-  ]
+    {
+      id: "1",
+      title: "Vorbereitung der Baustelle",
+      status: "completed",
+      subTasks: [
+        { id: "1.1", title: "Arbeitsbereich absichern", type: "checkbox", status: "completed" },
+        { id: "1.2", title: "Werkzeuge und Material prüfen", type: "checkbox", status: "completed" },
+        { id: "1.3", title: "Fotodokumentation Ausgangszustand", type: "photo", status: "completed" }
+      ]
+    },
+    {
+      id: "2",
+      title: "Installation der Wärmepumpe",
+      status: "pending",
+      subTasks: [
+        { id: "2.1", title: "Fundament prüfen", type: "checkbox", status: "pending" },
+        { id: "2.2", title: "Wärmepumpe positionieren", type: "photo", status: "pending" },
+        { id: "2.3", title: "Rohrleitungen anschließen", type: "text", status: "pending" },
+        { id: "2.4", title: "Dichtheitsprüfung durchführen", type: "select", options: ["Bestanden", "Nicht bestanden", "Nacharbeit erforderlich"], status: "pending" }
+      ]
+    },
+    {
+      id: "3",
+      title: "Elektrische Anschlüsse",
+      status: "pending",
+      subTasks: [
+        { id: "3.1", title: "Stromversorgung prüfen", type: "checkbox", status: "pending" },
+        { id: "3.2", title: "Kabel verlegen", type: "photo", status: "pending" },
+        { id: "3.3", title: "Anschlüsse dokumentieren", type: "text", status: "pending" }
+      ]
+    },
+    {
+      id: "4",
+      title: "Endabnahme",
+      status: "pending",
+      subTasks: [
+        { id: "4.1", title: "Funktionstest durchführen", type: "select", options: ["Erfolgreich", "Fehlgeschlagen", "Teilweise erfolgreich"], status: "pending" },
+        { id: "4.2", title: "Einweisung Kunde", type: "checkbox", status: "pending" },
+        { id: "4.3", title: "Abschlussdokumentation", type: "photo", status: "pending" }
+      ]
+    }
+  ] as Task[]
 }
 
 type TabType = "customer" | "project" | "documents"
 
+interface SubTaskFormData {
+  taskId: string
+  subTaskId: string
+  type: "checkbox" | "photo" | "text" | "select"
+  value: string
+  notes: string
+}
+
 export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>("customer")
+  const [expandedTask, setExpandedTask] = useState<string | null>(null)
+
+  const toggleTask = (taskId: string) => {
+    setExpandedTask(expandedTask === taskId ? null : taskId)
+  }
 
   return (
     <div className="flex flex-col h-full">
       {/* App Bar */}
-      <div className="bg-gray-50 border-b px-4 py-3 flex items-center gap-3">
-        <Link href="/mobile" className="text-gray-600">
-          <ChevronLeft className="w-6 h-6" />
-        </Link>
-        <span className="text-gray-900 text-lg font-medium">
-          {projectData.id}
-        </span>
+      <div className="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/mobile" className="text-gray-600">
+            <ChevronLeft className="w-6 h-6" />
+          </Link>
+          <span className="text-gray-900 text-lg font-medium">
+            {projectData.id}
+          </span>
+        </div>
+        <Cloud className="w-5 h-5 text-green-500" />
       </div>
 
       {/* Tabs */}
@@ -170,31 +240,70 @@ export default function ProjectDetailPage() {
 
         {/* Tasks Section - Always Visible */}
         <div className="mt-4 px-4 pb-4">
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <h3 className="font-medium mb-3 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
-              Aufgaben
-            </h3>
-            <div className="space-y-3">
-              {projectData.tasks.map((task) => (
-                <div key={task.id} className="flex items-center">
-                  <CheckCircle 
-                    className={`w-5 h-5 mr-3 ${
-                      task.status === 'completed' 
-                        ? 'text-green-500' 
-                        : 'text-gray-300'
-                    }`} 
-                  />
-                  <span className={
-                    task.status === 'completed' 
-                      ? 'line-through text-gray-500' 
-                      : 'text-gray-900'
-                  }>
-                    {task.title}
-                  </span>
-                </div>
-              ))}
+          <div className="bg-white rounded-xl shadow-sm divide-y">
+            <div className="p-4">
+              <h3 className="font-medium flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
+                Aufgaben
+              </h3>
             </div>
+            {projectData.tasks.map((task) => (
+              <div key={task.id}>
+                <button
+                  onClick={() => toggleTask(task.id)}
+                  className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle 
+                      className={`w-5 h-5 ${
+                        task.status === 'completed' 
+                          ? 'text-green-500' 
+                          : 'text-gray-300'
+                      }`} 
+                    />
+                    <span className={
+                      task.status === 'completed' 
+                        ? 'line-through text-gray-500' 
+                        : 'text-gray-900'
+                    }>
+                      {task.title}
+                    </span>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedTask === task.id ? 'rotate-90' : ''}`} />
+                </button>
+                {expandedTask === task.id && (
+                  <div className="bg-gray-50 px-4 py-2">
+                    <div className="space-y-2">
+                      {task.subTasks.map((subTask) => (
+                        <Link
+                          key={subTask.id}
+                          href={`/mobile/projects/${projectData.id}/sub-job/${subTask.id}`}
+                          className="w-full flex items-center justify-between p-2 rounded-lg bg-white hover:bg-gray-100"
+                        >
+                          <div className="flex items-center gap-3">
+                            <CheckCircle 
+                              className={`w-4 h-4 ${
+                                subTask.status === 'completed' 
+                                  ? 'text-green-500' 
+                                  : 'text-gray-300'
+                              }`} 
+                            />
+                            <span className={
+                              subTask.status === 'completed' 
+                                ? 'line-through text-gray-500' 
+                                : 'text-gray-900'
+                            }>
+                              {subTask.title}
+                            </span>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { MapPin, Calendar, FileText, ChevronRight, ArrowLeft } from "lucide-react"
+import { MapPin, Calendar, FileText, ChevronRight, ArrowLeft, Cloud } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
 
 // Mock data for jobs
@@ -146,8 +146,9 @@ export default function MobilePage() {
   return (
     <div className="flex flex-col h-full">
       {/* App Bar */}
-      <div className="bg-gray-50 border-b px-4 py-3 flex items-center">
-        <span className="text-gray-900 text-lg font-medium">Lubo</span>
+      <div className="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
+        <span className="text-gray-900 text-lg font-medium">Deine Jobs</span>
+        <Cloud className="w-5 h-5 text-green-500" />
       </div>
 
       {/* Content */}
