@@ -337,14 +337,20 @@ export default function ProjectDetailPage() {
                   <span className="text-sm">{projectData.customer.contactPerson}</span>
                 </div>
                 <div className="space-y-3 mt-3">
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="w-5 h-5 mr-3 text-[#FEDC00]" />
-                    <span className="text-sm">{projectData.customer.address}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Phone className="w-5 h-5 mr-3 text-[#FEDC00]" />
-                    <span className="text-sm">{projectData.customer.phone}</span>
-                  </div>
+                  <button 
+                    onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(projectData.customer.address)}`, '_blank')}
+                    className="w-full flex items-center text-gray-600 active:bg-gray-50 rounded-lg py-1 hover:underline decoration-[#FEDC00] decoration-2"
+                  >
+                    <MapPin className="w-5 h-5 mr-3 text-[#FEDC00] flex-shrink-0" />
+                    <span className="text-sm text-left">{projectData.customer.address}</span>
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = `tel:${projectData.customer.phone}`}
+                    className="w-full flex items-center text-gray-600 active:bg-gray-50 rounded-lg py-1 hover:underline decoration-[#FEDC00] decoration-2"
+                  >
+                    <Phone className="w-5 h-5 mr-3 text-[#FEDC00] flex-shrink-0" />
+                    <span className="text-sm text-left">{projectData.customer.phone}</span>
+                  </button>
                 </div>
               </div>
             </div>

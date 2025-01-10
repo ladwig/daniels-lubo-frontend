@@ -11,6 +11,7 @@ interface Job {
   type: string
   date: string
   projectId: string
+  isInventoryLink?: boolean
 }
 
 // Helper function to get background color based on job type
@@ -22,6 +23,8 @@ const getTypeColor = (type: string) => {
       return "bg-purple-100 text-purple-700"
     case "Gala":
       return "bg-green-100 text-green-700"
+    case "Inventur":
+      return "bg-yellow-100 text-yellow-700"
     default:
       return "bg-gray-100 text-gray-700"
   }
@@ -30,7 +33,7 @@ const getTypeColor = (type: string) => {
 export function JobCard({ job }: { job: Job }) {
   return (
     <Link 
-      href={`/mobile/projects/${job.projectId}`}
+      href={job.isInventoryLink ? "/mobile/inventory" : `/mobile/projects/${job.projectId}`}
       className="block"
     >
       <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -44,11 +47,11 @@ export function JobCard({ job }: { job: Job }) {
         </div>
         <div className="space-y-2">
           <div className="flex items-center text-gray-500">
-            <MapPin className="w-4 h-4 mr-2" />
+            <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="text-sm">{job.location}</span>
           </div>
           <div className="flex items-center text-gray-500">
-            <Calendar className="w-4 h-4 mr-2" />
+            <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="text-sm">{job.date}</span>
           </div>
         </div>

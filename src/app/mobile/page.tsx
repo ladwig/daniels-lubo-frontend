@@ -39,27 +39,37 @@ const jobsData = {
       id: "1",
       customerName: "Annika Müller",
       partner: "1komma5",
-      location: "Berlin Charlottenburg",
+      location: "Langestraße 49, 23945 Zürich", 
       type: "Installation",
-      date: "Heute, 14:00",
+      date: "Heute, 08:00",
       projectId: "PRJ001"
     },
     {
       id: "2",
       customerName: "David Langer",
       partner: "42watt",
-      location: "Berlin Kreuzberg",
-      type: "Gala",
+      location: "Gera Straße 12, 10115 München",
+      type: "Installation",
       date: "Heute, 16:30",
       projectId: "PRJ004"
     }
   ],
   upcoming: [
     {
+      id: "inventory",
+      customerName: "Lagerbestand",
+      partner: "Inventur",
+      location: "B-SR 120",
+      type: "Inventur",
+      date: "Morgen, 08:00",
+      projectId: "inventory",
+      isInventoryLink: true
+    },
+    {
       id: "3",
       customerName: "Michael Schmidt",
       partner: "1komma5",
-      location: "Berlin Mitte",
+      location: "Langestraße 123, 10115 Berlin",
       type: "Isolierung",
       date: "Morgen, 09:30",
       projectId: "PRJ002"
@@ -68,7 +78,7 @@ const jobsData = {
       id: "4",
       customerName: "Sarah Weber",
       partner: "42watt",
-      location: "Berlin Prenzlauer Berg",
+      location: "Köpenicker Straße 22, 10115 Berlin",
       type: "Gala",
       date: "Übermorgen, 11:00",
       projectId: "PRJ003"
@@ -79,7 +89,7 @@ const jobsData = {
       id: "5",
       customerName: "Thomas Bauer",
       partner: "1komma5",
-      location: "Berlin Mitte",
+      location: "Langestraße 123, 10115 Berlin",
       type: "Installation",
       date: "Gestern, 15:30",
       projectId: "PRJ005",
@@ -89,7 +99,7 @@ const jobsData = {
       id: "6",
       customerName: "Lisa Klein",
       partner: "42watt",
-      location: "Berlin Wedding",
+      location: "Köpenicker Straße 123, 10115 Berlin",
       type: "Isolierung",
       date: "05.02.2024",
       projectId: "PRJ006",

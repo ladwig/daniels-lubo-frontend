@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Calendar, FileText, ChevronRight } from "lucide-react"
+import { Calendar, FileText, ChevronRight, MapPin } from "lucide-react"
 
 interface CompletedJob {
   id: string
@@ -11,6 +11,7 @@ interface CompletedJob {
   date: string
   projectId: string
   protocol: string
+  location: string
 }
 
 // Helper function to get background color based on job type
@@ -33,9 +34,15 @@ export function CompletedJobCard({ job }: { job: CompletedJob }) {
       <div className="flex justify-between items-start mb-3">
         <div>
           <h3 className="font-medium">{job.customerName}, {job.partner}</h3>
-          <div className="flex items-center text-gray-500 mt-1">
-            <Calendar className="w-4 h-4 mr-2" />
-            <span className="text-sm">{job.date}</span>
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex items-center text-gray-500">
+              <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+              <span className="text-sm">{job.location}</span>
+            </div>
+            <div className="flex items-center text-gray-500">
+              <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+              <span className="text-sm">{job.date}</span>
+            </div>
           </div>
         </div>
         <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(job.type)}`}>
