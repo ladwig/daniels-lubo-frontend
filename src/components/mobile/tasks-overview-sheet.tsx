@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { CheckCircle, X, ChevronRight } from "lucide-react"
+import { CheckCircle, X, ChevronRight, ChevronLeft } from "lucide-react"
 
 interface SubTask {
   id: string
@@ -30,6 +30,9 @@ export function TasksOverviewSheet({ tasks, projectId, onClose }: TasksOverviewS
     setExpandedTask(expandedTask === taskId ? null : taskId)
   }
 
+  const completedTasks = tasks.reduce((acc, task) => acc + task.subTasks.filter(st => st.status === "completed").length, 0)
+  const totalTasks = tasks.reduce((acc, task) => acc + task.subTasks.length, 0)
+
   return (
     <>
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
@@ -37,7 +40,10 @@ export function TasksOverviewSheet({ tasks, projectId, onClose }: TasksOverviewS
         <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
           <h3 className="font-medium flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
-            Aufgaben
+            <div className="flex items-center gap-2">
+              <span>Aufgaben</span>
+              <span className="text-sm text-gray-500">{completedTasks}/{totalTasks}</span>
+            </div>
           </h3>
           <button 
             onClick={onClose}

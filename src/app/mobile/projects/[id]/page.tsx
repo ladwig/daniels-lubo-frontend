@@ -572,17 +572,25 @@ export default function ProjectDetailPage() {
                             setSearchQuery(material.name)
                             setIsSearchFocused(false)
                           }}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center justify-between"
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                         >
-                          <div className="flex items-center gap-2">
-                            {material.name === (editingItem?.name || newItem.name) && (
-                              <svg className="w-4 h-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            )}
-                            <span className="text-sm text-gray-900">{material.name}</span>
+                          {/* Material Image Skeleton */}
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0">
+                            <div className="w-full h-full rounded-lg bg-gradient-to-br from-gray-100 to-gray-200"></div>
                           </div>
-                          <span className="text-xs text-gray-500">{material.defaultUnit}</span>
+                          <div className="flex-1 flex items-center justify-between min-w-0">
+                            <div className="flex items-center gap-2 min-w-0">
+                              {material.name === (editingItem?.name || newItem.name) && (
+                                <svg className="w-4 h-4 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                              <div className="truncate">
+                                <span className="text-sm text-gray-900">{material.name}</span>
+                              </div>
+                            </div>
+                            <span className="text-xs text-gray-500 flex-shrink-0">{material.defaultUnit}</span>
+                          </div>
                         </button>
                       ))}
                   </div>
@@ -636,7 +644,14 @@ export default function ProjectDetailPage() {
           className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-medium hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center gap-2"
         >
           <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
-          <span>Aufgaben anzeigen</span>
+          <div className="flex items-center gap-2">
+            <span>Aufgaben anzeigen</span>
+            <span className="text-sm text-gray-500">
+              {projectData.tasks.reduce((acc, task) => acc + task.subTasks.filter(st => st.status === "completed").length, 0)}
+              /
+              {projectData.tasks.reduce((acc, task) => acc + task.subTasks.length, 0)}
+            </span>
+          </div>
         </button>
       </div>
 
