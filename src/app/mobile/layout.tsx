@@ -9,16 +9,29 @@ export default function MobileLayout({
 }: {
   children: React.ReactNode
 }) {
+  const handleReset = () => {
+    window.localStorage.clear()
+    window.location.reload()
+  }
+
   return (
     <div className="fixed inset-0 bg-blue-50 flex items-center justify-center">
       {/* Back to Web Button */}
-      <Link
-        href="/"
-        className="absolute top-4 left-4 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-50 transition-colors z-50"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Back to Web</span>
-      </Link>
+      <div className="absolute top-4 left-4 flex gap-2">
+        <Link
+          href="/"
+          className="bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-50 transition-colors z-50"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Web</span>
+        </Link>
+        <button
+          onClick={handleReset}
+          className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-red-600 transition-colors z-50"
+        >
+          Reset States
+        </button>
+      </div>
 
       {/* Phone frame */}
       <div className="w-[390px] h-[844px] bg-white rounded-[60px] overflow-hidden shadow-2xl relative">

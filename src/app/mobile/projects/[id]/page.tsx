@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, Cloud, Play } from "lucide-react"
+import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, Cloud, Play, Plus, X } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
 import { TasksOverviewSheet } from "@/components/mobile/tasks-overview-sheet"
 
@@ -22,6 +22,30 @@ interface Task {
   status: "completed" | "pending"
   subTasks: SubTask[]
 }
+
+// Add predefined materials list at the top after interfaces
+const predefinedMaterials = [
+  { id: "m1", name: "Kupferrohr 22mm", defaultUnit: "m" },
+  { id: "m2", name: "T-Stück 22mm", defaultUnit: "Stk" },
+  { id: "m3", name: "Isolierung 22mm", defaultUnit: "m" },
+  { id: "m4", name: "Kältemittel R32", defaultUnit: "kg" },
+  { id: "m5", name: "Schwingungsdämpfer", defaultUnit: "Stk" },
+  { id: "m6", name: "Wandhalterung", defaultUnit: "Stk" },
+  { id: "m7", name: "Kondensatschlauch", defaultUnit: "m" },
+  { id: "m8", name: "Wärmeleitpaste", defaultUnit: "Stk" },
+  { id: "m9", name: "Kabel NYM-J 5x2.5", defaultUnit: "m" },
+  { id: "m10", name: "Leitungsschutzschalter", defaultUnit: "Stk" },
+  { id: "m11", name: "Fehlerstromschutzschalter", defaultUnit: "Stk" },
+  { id: "m12", name: "Verteilerdose", defaultUnit: "Stk" },
+  { id: "m13", name: "Kabelbinder", defaultUnit: "Stk" },
+  { id: "m14", name: "Kabelkanal 40x60mm", defaultUnit: "m" },
+  { id: "m15", name: "Steckdose AP", defaultUnit: "Stk" },
+  { id: "m16", name: "Absperrband", defaultUnit: "m" },
+  { id: "m17", name: "Baustellen-Warnschilder", defaultUnit: "Stk" },
+  { id: "m18", name: "Schutzplane", defaultUnit: "m²" },
+  { id: "m19", name: "Arbeitshandschuhe", defaultUnit: "Stk" },
+  { id: "m20", name: "Prüfprotokoll", defaultUnit: "Stk" }
+] as const
 
 // Updated mock data with sub-tasks
 const projectData = {
@@ -85,10 +109,56 @@ const projectData = {
         { id: "4.3", title: "Abschlussdokumentation", type: "photo", status: "pending" }
       ]
     }
-  ] as Task[]
-}
+  ] as Task[],
+  materials: [
+    {
+      taskId: "1", // Vorbereitung der Baustelle
+      items: [
+        { id: "v1", name: "Absperrband", amount: 50, unit: "m" },
+        { id: "v2", name: "Baustellen-Warnschilder", amount: 4, unit: "Stk" },
+        { id: "v3", name: "Schutzplane", amount: 20, unit: "m²" },
+        { id: "v4", name: "Arbeitshandschuhe", amount: 3, unit: "Stk" }
+      ]
+    },
+    {
+      taskId: "2", // Installation der Wärmepumpe
+      items: [
+        { id: "w1", name: "Kupferrohr 22mm", amount: 15, unit: "m" },
+        { id: "w2", name: "T-Stück 22mm", amount: 6, unit: "Stk" },
+        { id: "w3", name: "Isolierung 22mm", amount: 15, unit: "m" },
+        { id: "w4", name: "Kältemittel R32", amount: 2.5, unit: "kg" },
+        { id: "w5", name: "Schwingungsdämpfer", amount: 4, unit: "Stk" },
+        { id: "w6", name: "Wandhalterung", amount: 2, unit: "Stk" },
+        { id: "w7", name: "Kondensatschlauch", amount: 5, unit: "m" },
+        { id: "w8", name: "Wärmeleitpaste", amount: 1, unit: "Stk" }
+      ]
+    },
+    {
+      taskId: "3", // Elektrische Anschlüsse
+      items: [
+        { id: "e1", name: "Kabel NYM-J 5x2.5", amount: 25, unit: "m" },
+        { id: "e2", name: "Leitungsschutzschalter", amount: 3, unit: "Stk" },
+        { id: "e3", name: "Fehlerstromschutzschalter", amount: 1, unit: "Stk" },
+        { id: "e4", name: "Verteilerdose", amount: 2, unit: "Stk" },
+        { id: "e5", name: "Kabelbinder", amount: 50, unit: "Stk" },
+        { id: "e6", name: "Kabelkanal 40x60mm", amount: 10, unit: "m" },
+        { id: "e7", name: "Steckdose AP", amount: 1, unit: "Stk" }
+      ]
+    },
+    {
+      taskId: "4", // Endabnahme
+      items: [
+        { id: "f1", name: "Prüfprotokoll", amount: 1, unit: "Stk" },
+        { id: "f2", name: "Bedienungsanleitung", amount: 1, unit: "Stk" },
+        { id: "f3", name: "Wartungsplan", amount: 1, unit: "Stk" },
+        { id: "f4", name: "Garantiekarte", amount: 1, unit: "Stk" },
+        { id: "f5", name: "Reinigungsmittel", amount: 1, unit: "Stk" }
+      ]
+    }
+  ]
+} as const
 
-type TabType = "customer" | "project" | "documents"
+type TabType = "customer" | "project" | "documents" | "aufmass"
 
 interface SubTaskFormData {
   taskId: string
@@ -101,6 +171,66 @@ interface SubTaskFormData {
 export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>("customer")
   const [isTasksVisible, setIsTasksVisible] = useState(false)
+  const [hasStartedJob, setHasStartedJob] = useState(false)
+  const [showAddItemForm, setShowAddItemForm] = useState(false)
+  const [newItem, setNewItem] = useState({ taskId: "", materialId: "", name: "", amount: "", unit: "" })
+  const [searchQuery, setSearchQuery] = useState("")
+  const [editingItem, setEditingItem] = useState<null | { id: string, taskId: string, materialId: string, name: string, amount: number, unit: string }>(null)
+
+  // Initialize hasStartedJob from localStorage after mount
+  useEffect(() => {
+    const stored = window.localStorage.getItem(`job_started_${projectData.id}`)
+    setHasStartedJob(stored === 'true')
+  }, [])
+
+  const handleJobStart = () => {
+    const firstIncompleteTask = projectData.tasks.find(t => t.status === 'pending')
+    if (firstIncompleteTask && firstIncompleteTask.subTasks.length > 0) {
+      // Store that we've started this job
+      window.localStorage.setItem(`job_started_${projectData.id}`, 'true')
+      setHasStartedJob(true)
+      window.location.href = `/mobile/projects/${projectData.id}/sub-job/${firstIncompleteTask.subTasks[0].id}`
+    }
+  }
+
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Here you would normally add the item to your backend
+    // For now we'll just close the form
+    setShowAddItemForm(false)
+    setNewItem({ taskId: "", materialId: "", name: "", amount: "", unit: "" })
+    setEditingItem(null)
+  }
+
+  const handleEditClick = (taskId: string, item: { id: string, name: string, amount: number, unit: string }) => {
+    // Find the material in predefinedMaterials to get its ID
+    const material = predefinedMaterials.find(m => m.name === item.name)
+    setEditingItem({
+      ...item,
+      taskId,
+      materialId: material?.id || 'm1' // Fallback to m1 if not found
+    })
+    setShowAddItemForm(true)
+  }
+
+  // Add a function to handle material selection
+  const handleMaterialSelect = (material: typeof predefinedMaterials[number]) => {
+    if (editingItem) {
+      setEditingItem({
+        ...editingItem,
+        materialId: material.id,
+        name: material.name,
+        unit: material.defaultUnit
+      })
+    } else {
+      setNewItem({
+        ...newItem,
+        materialId: material.id,
+        name: material.name,
+        unit: material.defaultUnit
+      })
+    }
+  }
 
   return (
     <div className="flex flex-col h-full max-w-md mx-auto bg-white relative">
@@ -150,6 +280,16 @@ export default function ProjectDetailPage() {
           >
             Dokumente
           </button>
+          <button
+            onClick={() => setActiveTab("aufmass")}
+            className={`px-4 py-3 text-sm font-medium border-b-2 ${
+              activeTab === "aufmass"
+                ? "border-[#FEDC00] text-gray-900"
+                : "border-transparent text-gray-600"
+            }`}
+          >
+            Aufmaß
+          </button>
         </div>
       </div>
 
@@ -161,11 +301,11 @@ export default function ProjectDetailPage() {
           {activeTab === "customer" && (
             <div className="divide-y">
               <div className="p-4">
-                <div className="flex items-center text-gray-600 mb-4">
+                <div className="flex items-center text-gray-600">
                   <User className="w-5 h-5 mr-3 text-[#FEDC00]" />
-                  <span className="font-medium">{projectData.customer.contactPerson}</span>
+                  <span className="text-sm">{projectData.customer.contactPerson}</span>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 mt-3">
                   <div className="flex items-center text-gray-600">
                     <MapPin className="w-5 h-5 mr-3 text-[#FEDC00]" />
                     <span className="text-sm">{projectData.customer.address}</span>
@@ -233,34 +373,178 @@ export default function ProjectDetailPage() {
               ))}
             </div>
           )}
-        </div>
 
-        {/* Start Job Button */}
-        <div className="p-4 bg-white border-b">
-          <button 
-            className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600] flex items-center justify-center gap-2"
-            onClick={() => {
-              const firstIncompleteTask = projectData.tasks.find(t => t.status === 'pending')
-              if (firstIncompleteTask && firstIncompleteTask.subTasks.length > 0) {
-                window.location.href = `/mobile/projects/${projectData.id}/sub-job/${firstIncompleteTask.subTasks[0].id}`
-              }
-            }}
-          >
-            <Play className="w-5 h-5" />
-            <span>Job starten</span>
-          </button>
+          {/* Aufmass Tab */}
+          {activeTab === "aufmass" && (
+            <div className="divide-y">
+              {projectData.tasks.map(task => {
+                const materials = projectData.materials.find(m => m.taskId === task.id)
+                
+                return (
+                  <div key={task.id} className="p-4">
+                    <h3 className="font-medium mb-3 text-gray-900">{task.title}</h3>
+                    <div className="space-y-2">
+                      {/* Add New Item Skeleton Button */}
+                      <button
+                        onClick={() => {
+                          setNewItem({ ...newItem, taskId: task.id })
+                          setShowAddItemForm(true)
+                        }}
+                        className="w-full flex items-center justify-between py-2 px-3 rounded-lg border-2 border-dashed border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                      >
+                        <span className="text-sm text-gray-500 flex items-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          Material hinzufügen
+                        </span>
+                        <span className="text-sm text-gray-400">Stk/m/kg</span>
+                      </button>
+
+                      {/* Existing Items */}
+                      {materials?.items.map(item => (
+                        <div key={item.id} className="flex items-center justify-between py-2 bg-gray-50 px-3 rounded-lg">
+                          <span className="text-sm text-gray-600">{item.name}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium">
+                              {item.amount} {item.unit}
+                            </span>
+                            <button
+                              onClick={() => handleEditClick(task.id, item)}
+                              className="p-1 hover:bg-gray-200 rounded-full"
+                            >
+                              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Add Item Form */}
+      {showAddItemForm && (
+        <div className="absolute inset-0 bg-white z-20">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h3 className="font-medium">{editingItem ? 'Material bearbeiten' : 'Material hinzufügen'}</h3>
+            <button 
+              onClick={() => {
+                setShowAddItemForm(false)
+                setEditingItem(null)
+              }}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <form onSubmit={handleAddItem} className="p-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Arbeitsschritt
+              </label>
+              <select
+                value={editingItem?.taskId || newItem.taskId}
+                onChange={e => editingItem 
+                  ? setEditingItem({...editingItem, taskId: e.target.value})
+                  : setNewItem({...newItem, taskId: e.target.value})
+                }
+                className="w-full border rounded-lg p-2"
+                required
+              >
+                <option value="">Bitte wählen...</option>
+                {projectData.tasks.map(task => (
+                  <option key={task.id} value={task.id}>{task.title}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Material
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full border rounded-lg p-2"
+                  placeholder="Material suchen..."
+                />
+                {searchQuery && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
+                    {predefinedMaterials
+                      .filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map(material => (
+                        <button
+                          key={material.id}
+                          type="button"
+                          onClick={() => {
+                            handleMaterialSelect(material)
+                            setSearchQuery("")
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-50 focus:bg-gray-50"
+                        >
+                          <span className="text-sm text-gray-900">{material.name}</span>
+                          <span className="text-xs text-gray-500 ml-2">({material.defaultUnit})</span>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Menge
+              </label>
+              <div className="relative rounded-lg border overflow-hidden">
+                <input
+                  type="number"
+                  value={editingItem?.amount || newItem.amount}
+                  onChange={e => editingItem
+                    ? setEditingItem({...editingItem, amount: Number(e.target.value)})
+                    : setNewItem({...newItem, amount: e.target.value})
+                  }
+                  className="w-full p-2 pr-16"
+                  required
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center px-3 bg-gray-50 border-l text-gray-500">
+                  {editingItem?.unit || newItem.unit || "---"}
+                </div>
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600]"
+            >
+              {editingItem ? 'Speichern' : 'Hinzufügen'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="border-t bg-white space-y-4 p-4">
+        {/* Start/Continue Job Button */}
+        <button 
+          className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600] flex items-center justify-center gap-2"
+          onClick={handleJobStart}
+        >
+          <Play className="w-5 h-5" />
+          <span>{hasStartedJob ? 'Weiterarbeiten' : 'Job starten'}</span>
+        </button>
 
         {/* Tasks Overview Button */}
-        <div className="p-4">
-          <button
-            onClick={() => setIsTasksVisible(true)}
-            className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-medium hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center gap-2"
-          >
-            <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
-            <span>Aufgaben anzeigen</span>
-          </button>
-        </div>
+        <button
+          onClick={() => setIsTasksVisible(true)}
+          className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-medium hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center gap-2"
+        >
+          <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
+          <span>Aufgaben anzeigen</span>
+        </button>
       </div>
 
       {/* Tasks Overview Sheet */}
