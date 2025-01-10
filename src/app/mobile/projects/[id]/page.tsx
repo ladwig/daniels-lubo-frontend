@@ -5,6 +5,7 @@ import Link from "next/link"
 import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, Cloud, Play, Plus, X } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
 import { TasksOverviewSheet } from "@/components/mobile/tasks-overview-sheet"
+import { PDFViewer } from "@/components/mobile/pdf-viewer"
 
 type SubTaskType = "checkbox" | "photo" | "text" | "select"
 
@@ -203,6 +204,7 @@ export default function ProjectDetailPage() {
   const [editingItem, setEditingItem] = useState<null | { id: string, taskId: string, materialId: string, name: string, amount: number, unit: string }>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState<null | typeof projectData.documents[number]>(null)
 
   // Initialize hasStartedJob from localStorage after mount
   useEffect(() => {
@@ -409,11 +411,15 @@ export default function ProjectDetailPage() {
           {activeTab === "documents" && (
             <div className="divide-y">
               {projectData.documents.map((doc) => (
-                <div key={doc.id} className="p-4">
+                <button
+                  key={doc.id}
+                  onClick={() => setSelectedDocument(doc)}
+                  className="w-full p-4 hover:bg-gray-50"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <FileText className="w-5 h-5 text-[#FEDC00] mr-3" />
-                      <div>
+                      <div className="text-left">
                         <div className="font-medium">{doc.name}</div>
                         <div className="text-sm text-gray-500">{doc.date}</div>
                       </div>
@@ -422,7 +428,7 @@ export default function ProjectDetailPage() {
                       {doc.type}
                     </span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -640,6 +646,14 @@ export default function ProjectDetailPage() {
           tasks={projectData.tasks}
           projectId={projectData.id}
           onClose={() => setIsTasksVisible(false)}
+        />
+      )}
+
+      {/* PDF Viewer */}
+      {selectedDocument && (
+        <PDFViewer
+          document={selectedDocument}
+          onClose={() => setSelectedDocument(null)}
         />
       )}
 
