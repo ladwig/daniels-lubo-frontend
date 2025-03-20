@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, Cloud, Play, Plus, X } from "lucide-react"
+import { MapPin, Phone, FileText, CheckCircle, Wrench, User, ChevronLeft, ChevronRight, MessageCircle, Play, Plus, X } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
 import { TasksOverviewSheet } from "@/components/mobile/tasks-overview-sheet"
 import { PDFViewer } from "@/components/mobile/pdf-viewer"
@@ -185,7 +185,7 @@ const projectData = {
   ]
 } as const
 
-type TabType = "customer" | "project" | "documents" | "aufmass"
+type TabType = "job" | "customer" | "project" | "documents"
 
 interface SubTaskFormData {
   taskId: string
@@ -195,21 +195,175 @@ interface SubTaskFormData {
   notes: string
 }
 
+// Mock data for jobs
+const jobsData = {
+  myJobs: [
+    {
+      id: "shk1",
+      title: "Wärmepumpe Installation",
+      type: "SHK",
+      status: "pending"
+    }
+  ],
+  allJobs: [
+    {
+      category: "VOC",
+      jobs: [
+        {
+          id: "voc1",
+          title: "Vorbereitung der Baustelle",
+          status: "completed"
+        }
+      ]
+    },
+    {
+      category: "SHK",
+      jobs: [
+        {
+          id: "shk1",
+          title: "Wärmepumpe Installation",
+          status: "pending"
+        },
+        {
+          id: "shk2",
+          title: "Rohrleitungen verlegen",
+          status: "pending"
+        }
+      ]
+    },
+    {
+      category: "Elektro",
+      jobs: [
+        {
+          id: "el1",
+          title: "Elektrische Anschlüsse",
+          status: "pending"
+        }
+      ]
+    },
+    {
+      category: "Isolierung",
+      jobs: [
+        {
+          id: "iso1",
+          title: "Rohrisolierung",
+          status: "pending"
+        }
+      ]
+    }
+  ]
+}
+
+// Add mock chat messages after the jobsData constant
+const mockChatMessages = [
+  {
+    id: "1",
+    user: {
+      name: "Sarah Weber",
+      role: "Planerin",
+      image: "/avatars/sarah.jpg"
+    },
+    message: "Habe die technischen Zeichnungen aktualisiert. Bitte beachtet die neue Position der Wärmepumpe.",
+    timestamp: "Heute, 09:15"
+  },
+  {
+    id: "2",
+    user: {
+      name: "Michael Schmidt",
+      role: "Techniker",
+      image: "/avatars/michael.jpg"
+    },
+    message: "Danke Sarah, ich schaue mir das gleich an. @Daniel, kannst du bitte die Isolierung entsprechend anpassen?",
+    timestamp: "Heute, 09:30"
+  },
+  {
+    id: "3",
+    user: {
+      name: "Daniel Schmidt",
+      role: "SHK",
+      image: "/avatars/daniel.jpg"
+    },
+    message: "Klar, mache ich. Brauche aber noch die genauen Maße für die Isolierung.",
+    timestamp: "Heute, 09:45"
+  },
+  {
+    id: "4",
+    user: {
+      name: "Lisa Krause",
+      role: "Projektleiterin",
+      image: "/avatars/lisa.jpg"
+    },
+    message: "Super, dass ihr das direkt klärt. Ich habe den Kunden informiert, dass wir morgen mit der Installation beginnen.",
+    timestamp: "Heute, 10:00"
+  }
+] as const
+
+// Add this after the mockChatMessages constant
+const jobSteps = [
+  {
+    id: "1",
+    title: "Vorbereitung",
+    status: "completed",
+    tasks: [
+      { id: "1.1", title: "Arbeitsbereich absichern", type: "checkbox", status: "completed" },
+      { id: "1.2", title: "Werkzeuge und Material prüfen", type: "checkbox", status: "completed" },
+      { id: "1.3", title: "Fotodokumentation Ausgangszustand", type: "photo", status: "completed" }
+    ]
+  },
+  {
+    id: "2",
+    title: "Installation",
+    status: "in_progress",
+    tasks: [
+      { id: "2.1", title: "Fundament prüfen", type: "checkbox", status: "pending" },
+      { id: "2.2", title: "Wärmepumpe positionieren", type: "photo", status: "pending" },
+      { id: "2.3", title: "Rohrleitungen anschließen", type: "text", status: "pending" }
+    ]
+  },
+  {
+    id: "3",
+    title: "Prüfung",
+    status: "pending",
+    tasks: [
+      { id: "3.1", title: "Dichtheitsprüfung", type: "select", options: ["Bestanden", "Nicht bestanden"], status: "pending" },
+      { id: "3.2", title: "Drucktest", type: "select", options: ["Bestanden", "Nicht bestanden"], status: "pending" }
+    ]
+  },
+  {
+    id: "4",
+    title: "Abnahme",
+    status: "pending",
+    tasks: [
+      { id: "4.1", title: "Funktionstest", type: "select", options: ["Erfolgreich", "Fehlgeschlagen"], status: "pending" },
+      { id: "4.2", title: "Einweisung Kunde", type: "checkbox", status: "pending" },
+      { id: "4.3", title: "Abschlussdokumentation", type: "photo", status: "pending" }
+    ]
+  }
+] as const
+
 export default function ProjectDetailPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("customer")
+  const [activeTab, setActiveTab] = useState<TabType>("job")
   const [isTasksVisible, setIsTasksVisible] = useState(false)
   const [hasStartedJob, setHasStartedJob] = useState(false)
   const [showAddItemForm, setShowAddItemForm] = useState(false)
+  const [showChat, setShowChat] = useState(false)
   const [newItem, setNewItem] = useState({ taskId: "", materialId: "", name: "", amount: "", unit: "" })
   const [editingItem, setEditingItem] = useState<null | { id: string, taskId: string, materialId: string, name: string, amount: number, unit: string }>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState<null | typeof projectData.documents[number]>(null)
+  const [isCheckedIn, setIsCheckedIn] = useState(false)
 
   // Initialize hasStartedJob from localStorage after mount
   useEffect(() => {
     const stored = window.localStorage.getItem(`job_started_${projectData.id}`)
     setHasStartedJob(stored === 'true')
+  }, [])
+
+  // Initialize isCheckedIn from localStorage after mount
+  useEffect(() => {
+    const stored = window.localStorage.getItem(`checkedIn_${projectData.id}`)
+    setIsCheckedIn(stored === 'true')
   }, [])
 
   const handleJobStart = () => {
@@ -220,6 +374,16 @@ export default function ProjectDetailPage() {
       setHasStartedJob(true)
       window.location.href = `/mobile/projects/${projectData.id}/sub-job/${firstIncompleteTask.subTasks[0].id}`
     }
+  }
+
+  const handleCheckIn = () => {
+    window.localStorage.setItem(`checkedIn_${projectData.id}`, 'true')
+    setIsCheckedIn(true)
+  }
+
+  const handleCheckOut = () => {
+    window.localStorage.removeItem(`checkedIn_${projectData.id}`)
+    setIsCheckedIn(false)
   }
 
   const handleAddItem = (e: React.FormEvent) => {
@@ -275,12 +439,27 @@ export default function ProjectDetailPage() {
             {projectData.id}
           </span>
         </div>
-        <Cloud className="w-5 h-5 text-green-500" />
+        <button 
+          onClick={() => setShowChat(true)}
+          className="text-[#FEDC00] hover:text-[#E5C700] active:text-[#D1B600]"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </button>
       </div>
 
       {/* Tabs */}
       <div className="bg-gray-50 px-2">
         <div className="flex">
+          <button
+            onClick={() => setActiveTab("job")}
+            className={`px-4 py-3 text-sm font-medium border-b-2 ${
+              activeTab === "job"
+                ? "border-[#FEDC00] text-gray-900"
+                : "border-transparent text-gray-600"
+            }`}
+          >
+            Job
+          </button>
           <button
             onClick={() => setActiveTab("customer")}
             className={`px-4 py-3 text-sm font-medium border-b-2 ${
@@ -311,16 +490,6 @@ export default function ProjectDetailPage() {
           >
             Dokumente
           </button>
-          <button
-            onClick={() => setActiveTab("aufmass")}
-            className={`px-4 py-3 text-sm font-medium border-b-2 ${
-              activeTab === "aufmass"
-                ? "border-[#FEDC00] text-gray-900"
-                : "border-transparent text-gray-600"
-            }`}
-          >
-            Aufmaß
-          </button>
         </div>
       </div>
 
@@ -328,6 +497,55 @@ export default function ProjectDetailPage() {
       <div className="flex-1 overflow-auto">
         {/* Tab Content */}
         <div className="bg-white">
+          {/* Job Tab */}
+          {activeTab === "job" && (
+            <div>
+              {!isCheckedIn ? (
+                <div className="p-4">
+                  <p className="text-sm text-gray-500 text-center">
+                    Bitte melden Sie sich an, um mit der Arbeit zu beginnen.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {/* User's Job */}
+                  <div className="p-4">
+                    <h2 className="text-sm font-medium text-gray-500 mb-3">Mein Job</h2>
+                    <Link
+                      href={`/mobile/projects/${projectData.id}/jobs/shk`}
+                      className="block bg-white rounded-lg p-4 shadow-sm border-2 border-[#FEDC00]"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-medium">SHK</span>
+                          <p className="text-sm text-gray-500 mt-1">Wärmepumpe Installation</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </div>
+                    </Link>
+                  </div>
+
+                  {/* Other Project Jobs */}
+                  <div className="p-4">
+                    <h2 className="text-sm font-medium text-gray-500 mb-3">Weitere Jobs im Projekt</h2>
+                    <div className="space-y-2 opacity-75">
+                      {["VOC", "Elektro", "Isolierung"].map((category) => (
+                        <div
+                          key={category}
+                          className="block bg-white rounded-lg p-4 shadow-sm"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">{category}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Customer Tab */}
           {activeTab === "customer" && (
             <div className="divide-y">
@@ -436,57 +654,6 @@ export default function ProjectDetailPage() {
                   </div>
                 </button>
               ))}
-            </div>
-          )}
-
-          {/* Aufmass Tab */}
-          {activeTab === "aufmass" && (
-            <div className="divide-y">
-              {projectData.tasks.map(task => {
-                const materials = projectData.materials.find(m => m.taskId === task.id)
-                
-                return (
-                  <div key={task.id} className="p-4">
-                    <h3 className="font-medium mb-3 text-gray-900">{task.title}</h3>
-                    <div className="space-y-2">
-                      {/* Add New Item Skeleton Button */}
-                      <button
-                        onClick={() => {
-                          setNewItem({ ...newItem, taskId: task.id })
-                          setShowAddItemForm(true)
-                        }}
-                        className="w-full flex items-center justify-between py-2 px-3 rounded-lg border-2 border-dashed border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                      >
-                        <span className="text-sm text-gray-500 flex items-center gap-2">
-                          <Plus className="w-4 h-4" />
-                          Material hinzufügen
-                        </span>
-                        <span className="text-sm text-gray-400">Stk/m/kg</span>
-                      </button>
-
-                      {/* Existing Items */}
-                      {materials?.items.map(item => (
-                        <div key={item.id} className="flex items-center justify-between py-2 bg-gray-50 px-3 rounded-lg">
-                          <span className="text-sm text-gray-600">{item.name}</span>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-medium">
-                              {item.amount} {item.unit}
-                            </span>
-                            <button
-                              onClick={() => handleEditClick(task.id, item)}
-                              className="p-1 hover:bg-gray-200 rounded-full"
-                            >
-                              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
             </div>
           )}
         </div>
@@ -633,49 +800,101 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="border-t bg-white space-y-4 p-4">
-        {/* Start/Continue Job Button */}
-        <button 
-          className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600] flex items-center justify-center gap-2"
-          onClick={handleJobStart}
-        >
-          <Play className="w-5 h-5" />
-          <span>{hasStartedJob ? 'Weiterarbeiten' : 'Job starten'}</span>
-        </button>
-
-        {/* Tasks Overview Button */}
-        <button
-          onClick={() => setIsTasksVisible(true)}
-          className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-medium hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center gap-2"
-        >
-          <CheckCircle className="w-5 h-5 text-[#FEDC00]" />
-          <div className="flex items-center gap-2">
-            <span>Aufgaben anzeigen</span>
-            <span className="text-sm text-gray-500">
-              {projectData.tasks.reduce((acc, task) => acc + task.subTasks.filter(st => st.status === "completed").length, 0)}
-              /
-              {projectData.tasks.reduce((acc, task) => acc + task.subTasks.length, 0)}
-            </span>
-          </div>
-        </button>
-      </div>
-
-      {/* Tasks Overview Sheet */}
-      {isTasksVisible && (
-        <TasksOverviewSheet
-          tasks={projectData.tasks}
-          projectId={projectData.id}
-          onClose={() => setIsTasksVisible(false)}
-        />
-      )}
-
       {/* PDF Viewer */}
       {selectedDocument && (
         <PDFViewer
           document={selectedDocument}
           onClose={() => setSelectedDocument(null)}
         />
+      )}
+
+      {/* Check-in/Check-out Button */}
+      {activeTab === "job" && (
+        <div className="border-t bg-white p-4">
+          {!isCheckedIn ? (
+            <button
+              onClick={handleCheckIn}
+              className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600] flex items-center justify-center gap-2"
+            >
+              <span>Check-in</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleCheckOut}
+              className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-medium hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center gap-2"
+            >
+              <span>Check-out</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Chat Overlay */}
+      {showChat && (
+        <div className="absolute inset-0 bg-white z-30">
+          <div className="flex flex-col h-full">
+            {/* Chat Header */}
+            <div className="bg-white border-b px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowChat(false)}
+                  className="text-gray-600"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <span className="text-gray-900 text-lg font-medium">
+                  Projekt Chat
+                </span>
+              </div>
+            </div>
+
+            {/* Chat Content */}
+            <div className="flex-1 overflow-auto bg-gray-50 p-4">
+              {mockChatMessages.length > 0 ? (
+                <div className="space-y-4">
+                  {mockChatMessages.map((msg) => (
+                    <div key={msg.id} className="flex gap-3">
+                      {/* User Avatar */}
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                        <div className="w-full h-full bg-gradient-to-br from-[#FEDC00] to-[#E5C700] flex items-center justify-center text-white font-medium">
+                          {msg.user.name.charAt(0)}
+                        </div>
+                      </div>
+                      
+                      {/* Message Content */}
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-medium text-sm">{msg.user.name}</span>
+                          <span className="text-xs text-gray-500">({msg.user.role})</span>
+                          <span className="text-xs text-gray-400 ml-auto">{msg.timestamp}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">{msg.message}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 mt-4">
+                  Noch keine Nachrichten
+                </div>
+              )}
+            </div>
+
+            {/* Chat Input */}
+            <div className="border-t bg-white p-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Nachricht schreiben..."
+                  className="flex-1 border rounded-lg px-3 py-2"
+                />
+                <button className="bg-[#FEDC00] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600]">
+                  Senden
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <NavigationBar />

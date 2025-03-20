@@ -33,7 +33,7 @@ const getTypeColor = (type: string) => {
 export function JobCard({ job }: { job: Job }) {
   return (
     <Link 
-      href={job.isInventoryLink ? "/mobile/inventory" : `/mobile/projects/${job.projectId}`}
+      href={job.isInventoryLink ? "/mobile/inventory/start" : `/mobile/projects/${job.projectId}`}
       className="block"
     >
       <div className="bg-white rounded-xl p-4 shadow-sm">

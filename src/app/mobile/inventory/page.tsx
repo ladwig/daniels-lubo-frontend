@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Car, ChevronRight, Plus, Calendar, ChevronLeft } from "lucide-react"
+import { Car, ChevronRight, Plus, Calendar, ChevronLeft, Play } from "lucide-react"
 import { NavigationBar } from "@/components/mobile/navigation-bar"
 
 // Mock data for vehicles and their inventory checks
@@ -123,17 +123,15 @@ export default function InventoryPage() {
       </div>
 
       {/* Action Button */}
-      {selectedVehicle && (
-        <div className="border-t bg-white p-4">
-          <Link
-            href={`/mobile/inventory/${selectedVehicle.id}/new-check`}
-            className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600] flex items-center justify-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Neue Inventur</span>
-          </Link>
-        </div>
-      )}
+      <div className="border-t bg-white p-4">
+        <Link
+          href={selectedVehicle ? `/mobile/inventory/${selectedVehicle.id}/new-check` : "/mobile/inventory/start"}
+          className="w-full bg-[#FEDC00] text-white py-3 rounded-lg font-medium hover:bg-[#E5C700] active:bg-[#D1B600] flex items-center justify-center gap-2"
+        >
+          {selectedVehicle ? <Plus className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          <span>{selectedVehicle ? "Neue Inventur" : "Inventur starten"}</span>
+        </Link>
+      </div>
 
       <NavigationBar />
     </div>
